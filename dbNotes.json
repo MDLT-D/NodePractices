@@ -2,23 +2,23 @@
   "notes": [
     {
       "id": "b0076f3f-7b72-41ab-873f-01b29655441a",
-      "title": "Mi primera nota",
+      "title": "Primera nota",
       "content": "Este es el contenido de la nota."
     },
     {
       "id": "742bf9a6-9e75-412d-84c4-e901800e8d9f",
-      "title": "HoLAAA",
-      "content": "IWNVW"
+      "title": "Segunda nota",
+      "content": "Este es el contenido de la nota."
     },
     {
       "id": "28c9dc73-73b8-48f2-b8ae-ab4e205cfbd8",
-      "title": "wAKEUPPP",
-      "content": "IWNVW"
+      "title": "Tercer nota",
+      "content": "Este es el contenido de la nota."
     },
     {
       "id": "9eae176e-a4da-4f90-a0ea-b3c27f7fb928",
-      "title": "WAYYYS",
-      "content": "IWNVW"
+      "title": "Cuarta nota",
+      "content": "Este es el contenido de la nota."
     }
   ]
 }
