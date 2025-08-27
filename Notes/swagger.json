@@ -1,0 +1,50 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Notes API",
+    "version": "1.0.0",
+    "description": "API to create, show, delete and search notes."
+  },
+  "paths": {
+    "/notes": {
+      "get": {
+        "summary": "Get all the notes",
+        "responses": {
+          "200": {
+            "description": "Notes"
+          },
+          "500": {
+            "description": "Internal Error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new Note",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "content": { "type": "string" }
+                },
+                "required": ["title", "content"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "New Note" },
+          "400": { "description": "Missing required fields" },
+          "500": {
+            "description": "Internal Error"
+          }
+        
+        }
+      }
+    },
+    "/notes:id":{}
+  }
+}

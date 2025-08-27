@@ -11,12 +11,12 @@ export async function getAllNotes() {
 //GET /notes/:id – Return note by id.
 export async function getNote(idNote) {
       const dbInfo= await getAllNotes();
-    return dbInfo.find(note=>note.id === idNote);
+    return dbInfo.find(note=>note.id === idNote) ;
 }
 //GET /notes/:title – Return note by title.
 export async function getNoteTitle(titleNote) {
     const dbInfo= await getAllNotes();
-return dbInfo.filter(note =>note.title.toLowerCase().includes(titleNote.toLowerCase()));
+return dbInfo.filter(note =>note.title.toLowerCase()===titleNote.toLowerCase());
 }
 //POST /notes – Accept { title, content } and save the new note to notes.json.
 export async function addNote(info) {
