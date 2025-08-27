@@ -2,6 +2,16 @@ import express from "express";
 import {getAllBooks,getBook,addBook,deleteBook} from "./routes/books.js"
 const app= express();
 app.use(express.json());
+//Middleware to invalid json
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+    return res.status(400).send({
+      error:
+        "The information you sent seems incorrect. Please review and resend.",
+    });
+  }
+  next();
+});
 
 app.get ("/books",getAllBooks);
 
