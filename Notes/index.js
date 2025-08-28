@@ -10,10 +10,10 @@ import {
   getNoteTitle,
   deleteNote,
 } from "./src/notesActions.js";
-//import swaggerDocument from "./swagger.json" with { type: "json" };
+import swaggerDocument from "./swagger.json" with { type: "json" };
 
 const app = express();
-//app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 //transform json
 app.use(bodyParser.json());
 // Middleware to invalid JSON

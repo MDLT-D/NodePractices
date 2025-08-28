@@ -11,40 +11,162 @@
         "summary": "Get all the notes",
         "responses": {
           "200": {
-            "description": "Notes"
+            "description": "Notes founded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "b0076f3f-7b72-41ab-873f-01b29655441a"
+                      },
+                      "title": { "type": "string", "example": "Title book 1" },
+                      "content": {
+                        "type": "string",
+                        "example": "This book will show you ..."
+                      }
+                    }
+                  }
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal Error"
-          }
-        }
-      },
-      "post": {
-        "summary": "Create a new Note",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "title": { "type": "string" },
-                  "content": { "type": "string" }
-                },
-                "required": ["title", "content"]
+            "description": "Unexpected error. Please try again later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Unexpected error. Please try again later."
+                    }
+                  }
+                }
               }
             }
           }
-        },
-        "responses": {
-          "201": { "description": "New Note" },
-          "400": { "description": "Missing required fields" },
-          "500": {
-            "description": "Internal Error"
-          }
-        
         }
       }
     },
-    "/notes:id":{}
+    "notes/:value": {
+      "get": {
+        "summary": "Get notes by ID (UUID) or title",
+        "parameters": [
+          {
+            "name": "value",
+            "in": "path",
+            "required": true,
+            "description": "Note ID (UUID) or title",
+            "schema": {
+              "type": "string",
+              "maxLength": 80
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Note found (object if searched by ID, array if searched by title)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "example": "b0076f3f-7b72-41ab-873f-01b29655441a"
+                        },
+                        "title": {
+                          "type": "string",
+                          "example": "Title book 1"
+                        },
+                        "content": {
+                          "type": "string",
+                          "example": "This book will show you ..."
+                        }
+                      }
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "b0076f3f-7b72-41ab-873f-01b29655441a"
+                          },
+                          "title": {
+                            "type": "string",
+                            "example": "Title book 1"
+                          },
+                          "content": {
+                            "type": "string",
+                            "example": "This book will show you ..."
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The value doesnt exist or exceed 80 characters ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "The search value must not exceed 80 characters."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No note found with the given UUID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "No note was found matching your request."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected error. Please try again later.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Unexpected error. Please try again later."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }
