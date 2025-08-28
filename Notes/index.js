@@ -49,6 +49,11 @@ app.get("/notes/:value", async (req, res) => {
         error: "Please enter the title or ID of the note you want to view.",
       });
     }
+   if (value.length > 80) {
+  return res.status(400).send({
+    error: "The search value must not exceed 80 characters.",
+  });
+}
     try {
     let note;
     //if is uuid get note by id
@@ -90,25 +95,33 @@ app.post("/notes", async (req, res) => {
     }
     const { title, content } = req.body;
     //validate the values exists and are strings
-    if (!title || typeof title !== "string" || !title.trim()) {
-      return res.status(400).send({
-        error: "Please enter a valid title for your note.",
-      });
-    }
+   
+const errors = [];
 
-    if (!content || typeof content !== "string" || !content.trim()) {
-      return res.status(400).send({
-        error: "Please enter valid content for your note.",
-      });
-    }
+if (!title || typeof title !== "string" || !title.trim()) {
+  errors.push("Please enter a valid title for your note.");
+} else if (title.trim().length > 30) {
+  errors.push("The title must not exceed 30 characters.");
+}
 
+if (!content || typeof content !== "string" || !content.trim()) {
+  errors.push("Please enter valid content for your note.");
+} else if (content.trim().length > 80) {
+  errors.push("The content must not exceed 80 characters.");
+}
+
+if (errors.length > 0) {
+  return res.status(400).send({ errors });
+}
     const newTitle = title.trim();
     const newContent = content.trim();
     //create the new note
     const newNote = { id: uuidv4(), title: newTitle, content: newContent };
     await addNote(newNote);
 
-    res.status(201).send(newNote);
+     res
+      .status(201)
+      .send({ message: "Note created successfully.", data: newNote });
   } catch (error) {
     res
       .status(500)
