@@ -70,7 +70,6 @@ export async function getBook(req, res) {
       continue;
     }
 
-    // Validar que el libro tenga los campos necesarios
     if (!book?.id || !book?.title || !book?.author) {
       console.warn(`Skipping file with missing data: ${file}`);
       continue;
