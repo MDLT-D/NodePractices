@@ -1,53 +1,36 @@
 {
   "openapi": "3.0.4",
   "info": {
-    "title": "Notes API",
+    "title": "Books API",
     "version": "1.0.0",
-    "description": "API to manage personal notes. Supports creating, listing, searching by ID or title, and deleting notes."
+    "description": "API to manage a collection of books. Allows creating, listing, retrieving by ID, and deleting books."
   },
   "tags": [
     {
-      "name": "Notes",
-      "description": "Operations for managing notes: create, list, retrieve by ID or title, and delete."
+      "name": "Books",
+      "description": "Operations for managing books: create, list, retrieve by ID, and delete."
     }
   ],
   "paths": {
-    "/notes": {
+    "/books": {
       "get": {
-        "summary": "Get all the notes",
-        "description": "Returns a list of all saved notes.",
-        "tags": ["Notes"],
+        "summary": "Get a list of all the books in data",
+        "description": "Returns a plain-text list of books (title and author). Skips invalid or incomplete JSON files.",
+        "tags": ["Books"],
         "responses": {
           "200": {
-            "description": "List of notes retrieved successfully",
+            "description": "List of all valid books",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string",
-                        "format": "uuid",
-                        "example": "b0076f3f-7b72-41ab-873f-01b29655441a"
-                      },
-                      "title": {
-                        "type": "string",
-                        "example": "Title book 1"
-                      },
-                      "content": {
-                        "type": "string",
-                        "example": "This book will show you ..."
-                      }
-                    }
-                  }
+                  "type": "string",
+                  "example": "▸ Don Quixote, Miguel de Cervantes\n▸ 1984, George Orwell\n▸ The Hobbit, J.R.R. Tolkien"
                 }
               }
             }
           },
           "500": {
-            "description": "An internal server error occurred",
+            "description": "Unexpected server error",
             "content": {
               "application/json": {
                 "schema": {
@@ -65,26 +48,25 @@
         }
       },
       "post": {
-        "summary": "Add a new note",
-        "description": "Creates a new note with a title and content. Title must be ≤30 characters and content ≤80 characters.",
-        "tags": ["Notes"],
+        "summary": "Create a new Book",
+        "tags": ["Books"],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["title", "content"],
+                "required": ["title", "author"],
                 "properties": {
                   "title": {
                     "type": "string",
                     "maxLength": 30,
-                    "example": "Things to shop..."
+                    "example": "The Hobbit"
                   },
-                  "content": {
+                  "author": {
                     "type": "string",
-                    "maxLength": 80,
-                    "example": "Eggs, water, cereal..."
+                    "maxLength": 30,
+                    "example": "J.R.R. Tolkien"
                   }
                 }
               }
@@ -93,7 +75,7 @@
         },
         "responses": {
           "201": {
-            "description": "Note created successfully",
+            "description": "Book created successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -101,7 +83,7 @@
                   "properties": {
                     "message": {
                       "type": "string",
-                      "example": "Note created successfully."
+                      "example": "Book created successfully."
                     },
                     "data": {
                       "type": "object",
@@ -113,11 +95,11 @@
                         },
                         "title": {
                           "type": "string",
-                          "example": "Shop List..."
+                          "example": "The Hobbit"
                         },
-                        "content": {
+                        "author": {
                           "type": "string",
-                          "example": "Milk, bread, eggs..."
+                          "example": "J.R.R. Tolkien"
                         }
                       }
                     }
@@ -127,142 +109,36 @@
             }
           },
           "400": {
-            "description": "Validation error: Missing or invalid fields",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "errors": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "example": "The content must not exceed 80 characters."
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "An internal server error occurred",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string",
-                      "example": "Unexpected error. Please try again later."
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/notes/{value}": {
-      "get": {
-        "summary": "Get notes by ID (UUID) or title",
-        "description": "Returns a note if the `value` is a UUID, or a list of notes if `value` matches a title.",
-        "tags": ["Notes"],
-        "parameters": [
-          {
-            "name": "value",
-            "in": "path",
-            "required": true,
-            "description": "The ID (UUID) or title of the note(s) to retrieve",
-            "schema": {
-              "type": "string",
-              "maxLength": 80
-            },
-            "example": "b0076f3f-7b72-41ab-873f-01b29655441a"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Note(s) found successfully",
+            "description": "Invalid input or missing data",
             "content": {
               "application/json": {
                 "schema": {
                   "oneOf": [
                     {
-                      "description": "If the value is a UUID, returns a single note object",
                       "type": "object",
                       "properties": {
-                        "id": {
+                        "error": {
                           "type": "string",
-                          "format": "uuid",
-                          "example": "b0076f3f-7b72-41ab-873f-01b29655441a"
-                        },
-                        "title": {
-                          "type": "string",
-                          "example": "Note title"
-                        },
-                        "content": {
-                          "type": "string",
-                          "example": "This is the content of the note."
+                          "example": "We didn’t receive the book information. Please try again."
                         }
                       }
                     },
                     {
-                      "description": "If the value is a title, returns an array of matching notes",
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "format": "uuid",
-                            "example": "b0076f3f-7b72-41ab-873f-01b29655441a"
+                      "type": "object",
+                      "properties": {
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
                           },
-                          "title": {
-                            "type": "string",
-                            "example": "Note title"
-                          },
-                          "content": {
-                            "type": "string",
-                            "example": "This is the content of the note."
-                          }
+                          "example": [
+                            "Please enter the book’s title.",
+                            "The author’s name must not exceed 30 characters."
+                          ]
                         }
                       }
                     }
                   ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "The provided value is invalid (missing or too long)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string",
-                      "example": "The search value must not exceed 80 characters."
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "No note found with the given ID or title",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string",
-                      "example": "No note was found matching your request."
-                    }
-                  }
                 }
               }
             }
@@ -286,17 +162,17 @@
         }
       }
     },
-    "/notes/{id}": {
-      "delete": {
-        "summary": "Delete a note by ID",
-        "description": "Deletes a note using its UUID. The ID must be valid and correspond to an existing note.",
-        "tags": ["Notes"],
+    "/books/{id}": {
+      "get": {
+        "summary": "Get a book by ID",
+        "description": "Searches for a book by UUID. If found, returns the title and author in plain text format.",
+        "tags": ["Books"],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "description": "The UUID of the note to delete",
+            "description": "Book ID (UUID format)",
             "schema": {
               "type": "string",
               "format": "uuid",
@@ -306,23 +182,18 @@
         ],
         "responses": {
           "200": {
-            "description": "Note deleted successfully",
+            "description": "Book found",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "example": "The note has been successfully deleted."
-                    }
-                  }
+                  "type": "string",
+                  "example": "▸ Don Quixote, Miguel de Cervantes\n"
                 }
               }
             }
           },
           "400": {
-            "description": "The ID is missing or not in a valid UUID format",
+            "description": "Invalid or missing ID",
             "content": {
               "application/json": {
                 "schema": {
@@ -330,7 +201,7 @@
                   "properties": {
                     "error": {
                       "type": "string",
-                      "example": "The ID you provided is not valid. Please try again."
+                      "example": "The book ID you entered doesn't look right. Please check and try again."
                     }
                   }
                 }
@@ -338,7 +209,7 @@
             }
           },
           "404": {
-            "description": "No note found with the given ID",
+            "description": "Book not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -346,7 +217,91 @@
                   "properties": {
                     "error": {
                       "type": "string",
-                      "example": "We couldn't find a note with the given information."
+                      "example": "We couldn't find a book with that ID. Please try with a different one."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Unexpected error. Please try again later."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a book by ID",
+        "description": "Deletes a book if the ID is valid and the book exists.",
+        "tags": ["Books"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Book ID (UUID format)",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "123e4567-e89b-12d3-a456-426614174000"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Book successfully deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "The book was deleted successfully."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or missing ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Please provide the ID of the book you want to delete."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Book not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "We couldn't find a book with the given information."
                     }
                   }
                 }

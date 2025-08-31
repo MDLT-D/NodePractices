@@ -1,6 +1,11 @@
 import express from "express";
 import {getAllBooks,getBook,addBook,deleteBook} from "./routes/books.js"
-const app= express();
+import swaggerUi from "swagger-ui-express";
+import swaggerDocument from "./swagger.json" with { type: "json" };
+
+const app = express();
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 app.use(express.json());
 //Middleware to invalid json
 app.use((err, req, res, next) => {
