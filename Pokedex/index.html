@@ -4,9 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pokédex</title>
+    <link rel="stylesheet" href="style.css">
   </head>
   <body>
-    <h1>Pokédex</h1>
+    <header>
+ <h1>Pokédex</h1>
+ 
+    </header>
+   
     <section id="searchPoke">
       <form action="" id="searchPokeForm">
         <input
@@ -19,31 +24,9 @@
       </form>
       <div id="pokeResult"></div>
     </section>
-    <script>
-      const form = document.getElementById("searchPokeForm");
+    <section id="mainPoke">
 
-      form.addEventListener("submit", (event) => {
-        event.preventDefault();
-        const value = document
-          .getElementById("searchValue")
-          .value.toLowerCase()
-          .trim();
-        if (!value) return;
-
-        fetch("https://pokeapi.co/api/v2/pokemon/" + value)
-          .then((res) => res.json())
-          .then((data) => {
-            document.getElementById("pokeResult").innerHTML = `
-          <h2>${data.name}</h2>
-          <img src="${data.sprites.front_default}" alt="${data.name}">
-          <p>Type(s): ${data.types.map((pokeType) => pokeType.type.name).join(", ")}</p>
-        `;
-          })
-          .catch((err) => {
-            document.getElementById("pokeResult").innerHTML =
-              "<p>No Pokémon found with that name or ID. Please enter a different one</p>";
-          });
-      });
-    </script>
+    </section>
+    <script src="script.js"></script>
   </body>
 </html>

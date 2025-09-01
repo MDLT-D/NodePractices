@@ -1,0 +1,33 @@
+body,html{
+    margin: 0;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    align-items: center;
+}
+
+header{
+    background-color: red;
+    color: white;
+    border-bottom: 10px solid black;
+    padding: 1%;
+    margin-bottom: 2%;
+}
+h1 {
+    margin: 0;
+
+}
+
+section{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+img{
+    width: 200px;
+}
+
+.cardPoke{
+    display: flex;
+    align-items: center;
+    background-color: aqua;
+}
