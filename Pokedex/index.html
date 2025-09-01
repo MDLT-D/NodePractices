@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pokédex</title>
+  </head>
+  <body>
+    <h1>Pokédex</h1>
+    <section id="searchPoke">
+      <form action="" id="searchPokeForm">
+        <input
+          type="text"
+          placeholder="Pokemon name or ID."
+          id="searchValue"
+          required
+        />
+        <button type="submit">Search</button>
+      </form>
+      <div id="pokeResult"></div>
+    </section>
+    <script>
+      const form = document.getElementById("searchPokeForm");
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const value = document
+          .getElementById("searchValue")
+          .value.toLowerCase()
+          .trim();
+        if (!value) return;
+
+        fetch("https://pokeapi.co/api/v2/pokemon/" + value)
+          .then((res) => res.json())
+          .then((data) => {
+            document.getElementById("pokeResult").innerHTML = `
+          <h2>${data.name}</h2>
+          <img src="${data.sprites.front_default}" alt="${data.name}">
+          <p>Type(s): ${data.types.map((pokeType) => pokeType.type.name).join(", ")}</p>
+        `;
+          })
+          .catch((err) => {
+            document.getElementById("pokeResult").innerHTML =
+              "<p>No Pokémon found with that name or ID. Please enter a different one</p>";
+          });
+      });
+    </script>
+  </body>
+</html>
