@@ -96,6 +96,9 @@ button {
 .typeName {
   font-weight: bold;
 }
+.previous,.next{
+  position: sticky;
+}
 @media (max-width: 700px) {
   #mainPoke {
     grid-template-columns: 1fr;
