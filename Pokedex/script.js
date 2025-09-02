@@ -8,18 +8,28 @@ form.addEventListener("submit", (e) => {
     .getElementById("searchValue")
     .value.toLowerCase()
     .trim();
-  if (!value) return;
+  if (!value) {
+    getPokes();
+  }
 
   fetch("https://pokeapi.co/api/v2/pokemon/" + value)
     .then((res) => res.json())
     .then((data) => {
-      document.getElementById("pokeResult").innerHTML = `
-          <h2>${data.name}</h2>
-          <img src="${data.sprites.front_default}" alt="${data.name}">
-          <p>Type(s): ${data.types
-            .map((pokeType) => pokeType.type.name)
-            .join(", ")}</p>
-        `;
+      document.getElementById("mainPoke").innerHTML = `
+    <div class="cardPoke" id="${data.id}">
+      <div>
+        <h2>${data.name.toUpperCase()}</h2>
+        <p class="typesPoke">Type(s): <br>${data.types
+          .map(
+            (pokeType) => `<span class="typeName">${pokeType.type.name}</span>`
+          )
+          .join(", ")}</p>
+      </div>
+      <img src="${data.sprites.other["official-artwork"].front_default}" alt="${
+        data.name
+      }">
+    </div>
+  `;
     })
     .catch((err) => {
       document.getElementById("pokeResult").innerHTML =
@@ -28,6 +38,10 @@ form.addEventListener("submit", (e) => {
 });
 
 d.addEventListener("DOMContentLoaded", () => {
+  getPokes();
+});
+
+function getPokes() {
   fetch("https://pokeapi.co/api/v2/pokemon?limit=20")
     .then((res) => res.json())
     .then((data) => {
@@ -38,19 +52,22 @@ d.addEventListener("DOMContentLoaded", () => {
 
       Promise.all(pokeListResult).then((pokemonList) => {
         const mainPoke = document.getElementById("mainPoke");
-        mainPoke.innerHTML = pokemonList.map(
-          (pokemon) =>
-            `<div class="cardPoke" id="${pokemon.id}">
+        mainPoke.innerHTML = pokemonList
+          .map(
+            (pokemon) =>
+              `<div class="cardPoke" id="${pokemon.id}">
           <div>
-    <h2>${pokemon.name}</h2>
-    <p>Type(s): ${pokemon.types
-            .map((pokeType) => pokeType.type.name)
-            .join(", ")}</p></div>
-    <img src="${pokemon.sprites.other["official-artwork"].front_default
-}" alt="${pokemon.name}">
+    <h2>${pokemon.name.toUpperCase()}</h2>
+    <p class="typesPoke">Type(s): <br>${pokemon.types
+      .map((pokeType) => `<span class="typeName">${pokeType.type.name}</span>`)
+      .join(", ")}</p></div>
+    <img src="${
+      pokemon.sprites.other["official-artwork"].front_default
+    }" alt="${pokemon.name}">
           
     </div>`
-        ).join("");
+          )
+          .join("");
       });
     });
-});
+}
