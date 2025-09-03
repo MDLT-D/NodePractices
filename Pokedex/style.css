@@ -11,12 +11,11 @@ header {
   border-bottom: 10px solid black;
   padding: 1%;
   padding-left: 30px;
-
   width: 100%;
   box-sizing: border-box;
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 100;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -36,10 +35,10 @@ img {
 }
 main {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 20px;
+  flex-direction: column;
+  align-items: center;
 }
+
 .cardPoke {
   display: flex;
   align-items: center;
@@ -50,7 +49,27 @@ main {
   width: 450px;
   gap: 20px;
 }
+.cardPokeSearch {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  background-color: #e3e3e3;
+  border-radius: 20px;
+  width: 700px;
+  gap: 80px;
+}
 
+.searchResultImg {
+  width: 250px;
+}
+
+.searchTitle {
+  font-size: 32px;
+}
+.searchTitle + .typesPoke {
+  font-size: 1.4em;
+}
 .searchPokeForm {
   align-items: center;
   justify-content: center;
@@ -58,7 +77,26 @@ main {
   padding: 10px;
   border-radius: 20px;
 }
+.errorTitle {
+  font-size: 28px;
+  font-weight: 700;
+  color: #750000;
+}
 
+.errorDescription {
+  font-size: 18px;
+  font-weight: 400;
+  padding: 20px;
+}
+
+.lineError {
+  flex-direction: column;
+  gap: 0px;
+}
+
+.getPokesSize {
+  font-size: 18px;
+}
 input {
   border: none;
   font-size: 16px;
@@ -82,12 +120,26 @@ button {
   background-color: black;
   color: white;
   width: 30%;
+  padding: 5px 0px;
+}
+button:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 #mainPoke {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
   justify-items: center;
+  width: 100%;
+  max-width: 1000px;
+  margin-bottom: 100px;
+  margin-top: 20px;
+}
+
+#mainPoke > .cardPokeSearch,
+#mainPoke > .loader {
+  grid-column: 1 / -1;
+  justify-self: center;
 }
 
 .typesPoke {
@@ -96,33 +148,91 @@ button {
 .typeName {
   font-weight: bold;
 }
-.previous,.next{
-  position: sticky;
+.previous,
+.next {
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  border: solid #248a9c;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 32px 0;
+  transition: box-shadow 0.2s;
+  padding: 3px 5px;
 }
-@media (max-width: 700px) {
+
+.previous:hover,
+.next:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+.previous {
+  grid-column: 1 / -1;
+  justify-self: start;
+  margin-bottom: 24px;
+  margin-top: 16px;
+}
+.next {
+  grid-column: 1 / -1;
+  justify-self: end;
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+.hiddenNav {
+  visibility: hidden;
+}
+.nav-arrows {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  gap: 70px;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 10px 0 10px 0;
+  z-index: 100;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.nav-arrows .previous,
+.nav-arrows .next {
+  position: static;
+  margin: 0;
+  width: 48px;
+  height: 48px;
+}
+
+@media (max-width: 900px) {
   #mainPoke {
+    max-width: 98vw;
     grid-template-columns: 1fr;
   }
   .cardPoke {
-    width: 90vw;
+    width: 95vw;
     min-width: 0;
-    flex-direction: column;
-    gap: 10px;
-    padding: 10px 0;
   }
-  img {
-    width: 100px;
+  .cardPokeSearch {
+    width: 95vw;
+    min-width: 0;
+    gap: 30px;
+  }
+  .searchResultImg {
+    width: 180px;
     max-width: 100%;
     height: auto;
   }
+}
+
+@media (max-width: 700px) {
   header {
-    padding-right: 10px;
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
-    padding-left: 10px;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding: 10px;
   }
   h1 {
     font-size: 28px;
@@ -137,13 +247,57 @@ button {
   }
   input,
   button {
-    width: 60%;
+    width: 100%;
     box-sizing: border-box;
     margin-bottom: 5px;
   }
   button {
     font-size: 14px;
-    padding: 0;
-    width: 30%;
+    padding: 8px 0;
+  }
+  .cardPoke {
+    width: 98vw;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 0;
+  }
+  .cardPokeSearch {
+    width: 98vw;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 0;
+    align-items: center;
+  }
+  .cardPokeSearch h2,
+  .cardPokeSearch .searchTitle {
+    font-size: 22px;
+  }
+  .cardPokeSearch .typesPoke {
+    font-size: 1em;
+  }
+  img {
+    width: 80px;
+    max-width: 100%;
+    height: auto;
+  }
+  .searchResultImg {
+    width: 100px;
+    max-width: 100%;
+    height: auto;
+  }
+  .previous,
+  .next {
+    width: 40px;
+    height: 40px;
+    margin: 20px 0;
+  }
+  .nav-arrows .previous,
+  .nav-arrows .next {
+    width: 36px;
+    height: 36px;
+  }
+  .nav-arrows {
+    gap: 20px;
+    padding: 6px 0 6px 0;
   }
 }
