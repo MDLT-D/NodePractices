@@ -8,6 +8,7 @@ loader.classList.add("loader");
 loader.src = "assets/loader.svg";
 const previous = document.querySelector(".previous");
 const next = document.querySelector(".next");
+const filterPokes= document.querySelector("select")
 
 //Search form
 form.addEventListener("submit", (e) => {
@@ -25,6 +26,7 @@ form.addEventListener("submit", (e) => {
 });
 //the principal page is loaded when the page starts
 d.addEventListener("DOMContentLoaded", () => {
+  getTypesPokes();
   getPokes("https://pokeapi.co/api/v2/pokemon?limit=20");
 });
 //Search a pokemon by name or id
@@ -59,6 +61,7 @@ async function searchPoke(value) {
     const pokeFound = await res.json();
 
     mainPoke.innerHTML = "";
+    const chartStats =  chartPoke(pokeFound.stats,200);
     //create the card
     const card = document.createElement("div");
     card.classList.add("cardPokeSearch");
@@ -80,9 +83,10 @@ async function searchPoke(value) {
     img.classList.add("searchResultImg");
     img.src = pokeFound.sprites.other["official-artwork"].front_default;
     img.alt = pokeFound.name;
+   
     card.appendChild(infoDiv);
     card.appendChild(img);
-
+ card.appendChild(chartStats);
     mainPoke.appendChild(card);
   } catch (error) {
     errorHandle("Unexpected Internal Error", "Please try again later.");
@@ -138,11 +142,13 @@ async function getPokes(url) {
     //wait until there is all the details from pokemons
     const pokeDetails = await Promise.all(responseDetails);
     mainPoke.innerHTML = "";
+
     pokeDetails.forEach((pokeInfo) => {
       if (!pokeInfo) {
         errorHandle("Sorry", "Unable to load this Pokémon.", true);
         return;
       }
+       const chartStats = chartPoke(pokeInfo.stats,100);
 
       const card = document.createElement("div");
       card.classList.add("cardPoke");
@@ -170,7 +176,7 @@ async function getPokes(url) {
 
       card.appendChild(infoDiv);
       card.appendChild(img);
-
+    card.appendChild(chartStats);
       mainPoke.appendChild(card);
     });
   } catch (error) {
@@ -208,6 +214,177 @@ function errorHandle(title, description, getFlag) {
   mainPoke.appendChild(card);
 }
 
+ function chartPoke(stats,size) {
+  const chartSpace = document.createElement("canvas");
+  chartSpace.width = size;
+
+
+  const sections = stats.map((st) => st.stat.name.toUpperCase());
+  const values = stats.map((st) => st.base_stat);
+
+  const bgColors = [];
+  const borderColors = [];
+
+const firstRed = 120; 
+  const lastRed = 255; 
+  const steps = stats.length - 1;
+
+  for (let i = 0; i < stats.length; i++) {
+    const red = Math.floor(firstRed + (i / steps) * (lastRed - firstRed));
+    bgColors.push(`rgba(${red}, 0, 0,0.8)`);
+    borderColors.push(`rgba(255, 255, 255)`);
+  }
+
+
+  const data = {
+    labels: sections,
+    datasets: [
+      {
+        data: values,
+        backgroundColor: bgColors,
+        borderColor: borderColors,
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const config = {
+  type: "pie",
+  data: data,
+  options: {
+    responsive: false,
+    plugins: {
+      legend: {
+        display: false, 
+      },
+      title: {
+        display: false,
+        text: "Pokémon Stats",
+      },
+    },
+  },
+};
+
+
+  new Chart(chartSpace.getContext("2d"), config);
+  return chartSpace;
+}
+
+async function getTypesPokes() {
+  const resTypes= await fetch("https://pokeapi.co/api/v2/type/");
+  const types= await resTypes.json();
+ //console.log(types);
+ types.results.forEach(type => {
+      const option = document.createElement("option");
+      option.value = type.url; 
+      option.textContent = type.name.toUpperCase();
+    
+      filterPokes.appendChild(option)});
+}
+
+filterPokes.onchange = () => {
+  const url = filterPokes.value; 
+  if (url) {
+    getPokesFilter(url); 
+  } else {
+    getPokes("https://pokeapi.co/api/v2/pokemon?limit=20"); 
+  }
+};
+
+//get the pokemons by url
+async function getPokesFilter(url) {
+  try {
+    mainPoke.innerHTML = "";
+    //show loader while the async function is waiting the responses from api
+    mainPoke.appendChild(loader);
+
+    const res = await fetch(url);
+    //Handle first request error
+    if (!res.ok) {
+      errorHandle(
+        "Something went wrong while searching.",
+        "Please try again later."
+      );
+      return;
+    }
+    //get the info from all the pokes in the url
+    const pokesInfo = await res.json();
+    console.log(pokesInfo);
+
+    //manage navigations buttons
+    if (!pokesInfo.previous) {
+      previous.classList.add("hiddenNav");
+    } else {
+      previous.classList.remove("hiddenNav");
+      previous.onclick = () => {
+        loadPage(pokesInfo.previous);
+      };
+    }
+    if (!pokesInfo.next) {
+      next.classList.add("hiddenNav");
+    } else {
+      next.classList.remove("hiddenNav");
+      next.onclick = () => {
+        loadPage(pokesInfo.next);
+      };
+    }
+/*
+    //for each result/pokemon make another request and create the cards
+    const responseDetails = pokesInfo.pokemon.pokemon.map(async (poke) => {
+      const res = await fetch(poke.url);
+      if (!res.ok) {
+        return null;
+      }
+      return res.json();
+    });
+    //wait until there is all the details from pokemons
+    const pokeDetails = await Promise.all(responseDetails);
+    mainPoke.innerHTML = "";
+
+    pokeDetails.forEach((pokeInfo) => {
+      if (!pokeInfo) {
+        errorHandle("Sorry", "Unable to load this Pokémon.", true);
+        return;
+      }
+       const chartStats = chartPoke(pokeInfo.stats,100);
+
+      const card = document.createElement("div");
+      card.classList.add("cardPoke");
+      card.id = pokeInfo.id;
+
+      const infoDiv = document.createElement("div");
+
+      const title = document.createElement("h2");
+      title.textContent = pokeInfo.name.toUpperCase();
+
+      const types = document.createElement("p");
+      types.classList.add("typesPoke");
+      types.innerHTML = `Type(s): <br>${pokeInfo.types
+        .map((t) => `<span class="typeName">${t.type.name}</span>`)
+        .join(", ")}`;
+
+      infoDiv.appendChild(title);
+      infoDiv.appendChild(types);
+
+      const img = document.createElement("img");
+      img.src =
+        pokeInfo.sprites.other["official-artwork"].front_default ||
+        pokeInfo.sprites.front_default;
+      img.alt = pokeInfo.name;
+
+      card.appendChild(infoDiv);
+      card.appendChild(img);
+    card.appendChild(chartStats);
+      mainPoke.appendChild(card);
+    });*/
+  } catch (error) {
+    errorHandle(
+      "Something went wrong while loading Pokémons.",
+      "Please try again later."
+    );
+    console.error(error);
+  }
+}
 //Search poke
 /*fetch("https://pokeapi.co/api/v2/pokemon/" + value)
     .then((res) => res.json())
