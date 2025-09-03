@@ -108,7 +108,7 @@ async function getPokes(url) {
     //get the info from all the pokes in the url
     const pokesInfo = await res.json();
     //console.log(pokesInfo);
-    mainPoke.innerHTML = "";
+
     //manage navigations buttons
     if (!pokesInfo.previous) {
       previous.classList.add("hiddenNav");
@@ -128,51 +128,51 @@ async function getPokes(url) {
     }
 
     //for each result/pokemon make another request and create the cards
-  const responseDetails = pokesInfo.results.map(async (poke) => {
-    const res = await fetch(poke.url);
-    if (!res.ok) {
-      return null;
-    }
-    return res.json();
-  });
-//wait until there is all the details from pokemons
-  const pokeDetails = await Promise.all(responseDetails);
+    const responseDetails = pokesInfo.results.map(async (poke) => {
+      const res = await fetch(poke.url);
+      if (!res.ok) {
+        return null;
+      }
+      return res.json();
+    });
+    //wait until there is all the details from pokemons
+    const pokeDetails = await Promise.all(responseDetails);
+    mainPoke.innerHTML = "";
+    pokeDetails.forEach((pokeInfo) => {
+      if (!pokeInfo) {
+        errorHandle("Sorry", "Unable to load this Pokémon.", true);
+        return;
+      }
 
-  pokeDetails.forEach((pokeInfo) => {
-    if (!pokeInfo) {
-      errorHandle("Sorry", "Unable to load this Pokémon.", true);
-      return;
-    }
+      const card = document.createElement("div");
+      card.classList.add("cardPoke");
+      card.id = pokeInfo.id;
 
-    const card = document.createElement("div");
-    card.classList.add("cardPoke");
-    card.id = pokeInfo.id;
+      const infoDiv = document.createElement("div");
 
-    const infoDiv = document.createElement("div");
+      const title = document.createElement("h2");
+      title.textContent = pokeInfo.name.toUpperCase();
 
-    const title = document.createElement("h2");
-    title.textContent = pokeInfo.name.toUpperCase();
+      const types = document.createElement("p");
+      types.classList.add("typesPoke");
+      types.innerHTML = `Type(s): <br>${pokeInfo.types
+        .map((t) => `<span class="typeName">${t.type.name}</span>`)
+        .join(", ")}`;
 
-    const types = document.createElement("p");
-    types.classList.add("typesPoke");
-    types.innerHTML = `Type(s): <br>${pokeInfo.types
-      .map((t) => `<span class="typeName">${t.type.name}</span>`)
-      .join(", ")}`;
+      infoDiv.appendChild(title);
+      infoDiv.appendChild(types);
 
-    infoDiv.appendChild(title);
-    infoDiv.appendChild(types);
+      const img = document.createElement("img");
+      img.src =
+        pokeInfo.sprites.other["official-artwork"].front_default ||
+        pokeInfo.sprites.front_default;
+      img.alt = pokeInfo.name;
 
-    const img = document.createElement("img");
-    img.src =
-      pokeInfo.sprites.other["official-artwork"].front_default ||
-      pokeInfo.sprites.front_default;
-    img.alt = pokeInfo.name;
+      card.appendChild(infoDiv);
+      card.appendChild(img);
 
-    card.appendChild(infoDiv);
-    card.appendChild(img);
-
-    mainPoke.appendChild(card);
-  });
+      mainPoke.appendChild(card);
+    });
   } catch (error) {
     errorHandle(
       "Something went wrong while loading Pokémons.",
