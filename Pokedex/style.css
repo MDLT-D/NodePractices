@@ -1,18 +1,56 @@
-:root{
+:root {
   --primary-color: #ffffff;
+  --header-bg: #ff0000;
+  --header-border: #000000;
+  --poke-card-bg: #e3e3e3;
+  --poke-title: #750000;
+  --button-bg: #000000;
+  --button-text: #ffffff;
+  --type-bold: #000000;
+  --text-colors: #000000;
+  --nav-arrow-bg: #ffffff;
+  --nav-arrow-border: #248a9c;
+  --nav-arrow-shadow: rgba(0, 0, 0, 0.08);
+  --nav-arrow-shadow-hover: rgba(0, 0, 0, 0.4);
+  --nav-bg: rgba(255, 255, 255, 0.7);
+  --error-title: #750000;
+  --error-bg: #fff0f0;
+  --error-description: #000000;
 }
 
-body,
-html {
+body.dark-mode {
+  --primary-color: #121212;
+  --header-bg: #750000;
+  --header-border: #ffffff;
+  --poke-card-bg: #2b2b2b;
+  --poke-title: #ff9999;
+  --button-bg: #ffffff;
+  --button-text: #000000;
+  --type-bold: #fff;
+  --text-colors: #ffffff;
+  --nav-arrow-bg: #222;
+  --nav-arrow-border: #4fd0ff;
+  --nav-arrow-shadow: rgba(255, 255, 255, 0.1);
+  --nav-arrow-shadow-hover: rgba(255, 255, 255, 0.4);
+  --nav-bg: rgba(0, 0, 0, 0.7);
+  --error-title: #ff9999;
+  --error-bg: #2b2b2b;
+  --error-description: #ffffff;
+}
+
+html,
+body {
   margin: 0;
+  min-height: 100vh;
+  background-color: var(--primary-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  color: var(--button-text);
   font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
-  align-items: center;
 }
-
 header {
-  background-color: red;
+  background-color: var(--header-bg);
   color: var(--primary-color);
-  border-bottom: 10px solid black;
+  border-bottom: 10px solid var(--header-border);
   padding: 1%;
   padding-left: 30px;
   width: 100%;
@@ -29,10 +67,11 @@ h1 {
   font-size: 40px;
   text-align: left;
   flex: 1;
+  color: white;
 }
 
 h2 {
-  color: #750000;
+  color: var(--poke-title);
 }
 img {
   width: 150px;
@@ -43,12 +82,17 @@ main {
   align-items: center;
 }
 
+.cardPoke,
+.cardPokeSearch,
+.searchPokeForm {
+  background-color: var(--poke-card-bg);
+}
+
 .cardPoke {
   display: flex;
   align-items: center;
   text-align: center;
   justify-content: space-around;
-  background-color: #e3e3e3;
   border-radius: 20px;
   width: 450px;
 }
@@ -57,10 +101,8 @@ main {
   align-items: center;
   text-align: center;
   justify-content: space-around;
-  background-color: #e3e3e3;
   border-radius: 20px;
   width: 700px;
-
 }
 
 .searchResultImg {
@@ -76,20 +118,20 @@ main {
 .searchPokeForm {
   align-items: center;
   justify-content: center;
-  background-color: #e3e3e3;
   padding: 10px;
   border-radius: 20px;
 }
 .errorTitle {
   font-size: 28px;
   font-weight: 700;
-  color: #750000;
+  color: var(--error-title);
 }
 
 .errorDescription {
   font-size: 18px;
   font-weight: 400;
   padding: 20px;
+  color: var(--error-description);
 }
 
 .lineError {
@@ -103,7 +145,7 @@ main {
 input {
   border: none;
   font-size: 16px;
-  background-color: #e3e3e3;
+  background-color: var(--poke-card-bg);
   width: 65%;
 }
 input:focus {
@@ -111,23 +153,44 @@ input:focus {
   outline: none;
 }
 input[type="text"] {
-  background-color: #e3e3e3 !important;
+  background-color: var(--poke-card-bg) !important;
   font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif !important;
-  color: black !important;
+  color: var(--text-colors) !important;
 }
 button {
   border-radius: 20px;
   font-size: 16px;
   font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
   border: none;
-  background-color: black;
-  color: var(--primary-color);
+  background-color: var(--button-bg);
+  color: var(--button-text);
   width: 30%;
   padding: 5px 0px;
 }
 button:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 12px var(--nav-arrow-shadow-hover);
 }
+
+.modeColors img {
+  width: 24px;
+  height: 24px;
+  display: block;
+  margin: 0 auto;
+  padding: 0;
+}
+.modeColors {
+  width: 36px;
+  height: 36px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--button-bg);
+  border: none;
+  cursor: pointer;
+  margin-left: 24px;
+}
+
 #mainPoke {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -145,21 +208,32 @@ button:hover {
   justify-self: center;
 }
 
+.loader {
+  filter: none;
+  transition: filter 0.3s ease;
+}
+
+body.dark-mode .loader {
+  filter: invert(1); /* Cambia negro a blanco */
+}
+
 .typesPoke {
   font-weight: 400;
+  color: var(--poke-title);
 }
 .typeName {
   font-weight: bold;
+  color: var(--type-bold);
 }
 .previous,
 .next {
   width: 48px;
   height: 48px;
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--nav-arrow-bg);
   border-radius: 50%;
-  border: solid #248a9c;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: solid var(--nav-arrow-border);
+  box-shadow: 0 2px 8px var(--nav-arrow-shadow);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -170,7 +244,7 @@ button:hover {
 
 .previous:hover,
 .next:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 12px var(--nav-arrow-shadow-hover);
 }
 .previous {
   grid-column: 1 / -1;
@@ -195,10 +269,10 @@ button:hover {
   display: flex;
   justify-content: center;
   gap: 70px;
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--nav-bg);
   padding: 10px 0 10px 0;
   z-index: 100;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 -2px 8px var(--nav-arrow-shadow);
 }
 
 .nav-arrows .previous,
@@ -209,10 +283,24 @@ button:hover {
   height: 48px;
 }
 
-.littleChart{
+.littleChart {
   width: 100px;
 }
 
+select {
+  padding: 10px;
+  border-radius: 20px;
+  background: var(--poke-card-bg);
+  color: var(--text-colors);
+  text-align: center;
+}
+.filterContainer {
+  color: var(--text-colors);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
 @media (max-width: 900px) {
   #mainPoke {
     max-width: 98vw;
@@ -247,7 +335,7 @@ button:hover {
     width: 100%;
   }
   .searchPokeForm {
-    width: 100%;
+    width: 70%;
     padding: 5px;
     flex-direction: column;
     gap: 5px;
@@ -306,5 +394,10 @@ button:hover {
   .nav-arrows {
     gap: 20px;
     padding: 6px 0 6px 0;
+  }
+  .modeColors {
+    margin-left: 0;
+    margin-top: 12px;
+    align-self: stretch;
   }
 }

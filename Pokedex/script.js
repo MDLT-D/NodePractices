@@ -8,8 +8,9 @@ loader.classList.add("loader");
 loader.src = "assets/loader.svg";
 const previous = document.querySelector(".previous");
 const next = document.querySelector(".next");
-const filterPokes= document.querySelector("select")
-
+const filterPokes = document.querySelector("select");
+const toggleButton = document.getElementById("modeColors");
+const icon = toggleButton.querySelector("img");
 //Search form
 form.addEventListener("submit", (e) => {
   e.preventDefault();
@@ -26,12 +27,25 @@ form.addEventListener("submit", (e) => {
 });
 //the principal page is loaded when the page starts
 d.addEventListener("DOMContentLoaded", () => {
+  const theme = localStorage.getItem("theme");
+  const toggleButton = document.getElementById("modeColors");
+  const icon = toggleButton.querySelector("img");
+
+  if (theme === "dark") {
+    document.body.classList.add("dark-mode");
+    icon.src = "assets/light.svg"; // Mostrar ícono de modo claro
+  } else {
+    document.body.classList.remove("dark-mode");
+    icon.src = "assets/dark.svg"; // Mostrar ícono de modo oscuro
+  }
+
   getTypesPokes();
   getPokes("https://pokeapi.co/api/v2/pokemon?limit=20");
 });
 //Search a pokemon by name or id
 async function searchPoke(value) {
   try {
+    // filterPokes.classList.add("hiddenNav");
     mainPoke.innerHTML = "";
     //show loader while the async function is waiting the responses from api
     mainPoke.appendChild(loader);
@@ -61,7 +75,7 @@ async function searchPoke(value) {
     const pokeFound = await res.json();
 
     mainPoke.innerHTML = "";
-    const chartStats =  chartPoke(pokeFound.stats,200);
+    const chartStats = chartPoke(pokeFound.stats, 200);
     //create the card
     const card = document.createElement("div");
     card.classList.add("cardPokeSearch");
@@ -83,10 +97,10 @@ async function searchPoke(value) {
     img.classList.add("searchResultImg");
     img.src = pokeFound.sprites.other["official-artwork"].front_default;
     img.alt = pokeFound.name;
-   
+
     card.appendChild(infoDiv);
     card.appendChild(img);
- card.appendChild(chartStats);
+    card.appendChild(chartStats);
     mainPoke.appendChild(card);
   } catch (error) {
     errorHandle("Unexpected Internal Error", "Please try again later.");
@@ -148,7 +162,7 @@ async function getPokes(url) {
         errorHandle("Sorry", "Unable to load this Pokémon.", true);
         return;
       }
-       const chartStats = chartPoke(pokeInfo.stats,100);
+      const chartStats = chartPoke(pokeInfo.stats, 100);
 
       const card = document.createElement("div");
       card.classList.add("cardPoke");
@@ -176,7 +190,7 @@ async function getPokes(url) {
 
       card.appendChild(infoDiv);
       card.appendChild(img);
-    card.appendChild(chartStats);
+      card.appendChild(chartStats);
       mainPoke.appendChild(card);
     });
   } catch (error) {
@@ -213,29 +227,25 @@ function errorHandle(title, description, getFlag) {
   }
   mainPoke.appendChild(card);
 }
-
- function chartPoke(stats,size) {
+//make the chart for values
+function chartPoke(stats, size) {
   const chartSpace = document.createElement("canvas");
   chartSpace.width = size;
-
-
+  //get the sections and values
   const sections = stats.map((st) => st.stat.name.toUpperCase());
   const values = stats.map((st) => st.base_stat);
-
+  //manage a scale of colors
   const bgColors = [];
   const borderColors = [];
-
-const firstRed = 120; 
-  const lastRed = 255; 
+  const firstRed = 120;
+  const lastRed = 255;
   const steps = stats.length - 1;
-
   for (let i = 0; i < stats.length; i++) {
     const red = Math.floor(firstRed + (i / steps) * (lastRed - firstRed));
     bgColors.push(`rgba(${red}, 0, 0,0.8)`);
     borderColors.push(`rgba(255, 255, 255)`);
   }
-
-
+  //chart
   const data = {
     labels: sections,
     datasets: [
@@ -249,57 +259,65 @@ const firstRed = 120;
   };
 
   const config = {
-  type: "pie",
-  data: data,
-  options: {
-    responsive: false,
-    plugins: {
-      legend: {
-        display: false, 
-      },
-      title: {
-        display: false,
-        text: "Pokémon Stats",
+    type: "pie",
+    data: data,
+    options: {
+      responsive: false,
+      plugins: {
+        legend: {
+          display: false,
+        },
+        title: {
+          display: false,
+          text: "Pokémon Stats",
+        },
       },
     },
-  },
-};
-
+  };
 
   new Chart(chartSpace.getContext("2d"), config);
   return chartSpace;
 }
-
+//get the types that have at least 1 pokemon
 async function getTypesPokes() {
-  const resTypes= await fetch("https://pokeapi.co/api/v2/type/");
-  const types= await resTypes.json();
- //console.log(types);
- types.results.forEach(type => {
-      const option = document.createElement("option");
-      option.value = type.url; 
-      option.textContent = type.name.toUpperCase();
-    
-      filterPokes.appendChild(option)});
-}
+  //get the types
+  const resTypes = await fetch("https://pokeapi.co/api/v2/type/");
+  const types = await resTypes.json();
+  //filter
+  const typeChecks = await Promise.all(
+    types.results.map(async (type) => {
+      const res = await fetch(type.url);
+      const typeData = await res.json();
+      return typeData.pokemon.length > 0 ? type : null;
+    })
+  );
 
+  const validTypes = typeChecks.filter((type) => type !== null);
+
+  // add the types to the select
+  validTypes.forEach((type) => {
+    const option = document.createElement("option");
+    option.value = type.url;
+    option.textContent = type.name.toUpperCase();
+    filterPokes.appendChild(option);
+  });
+}
+//manage the routes to get pokes
 filterPokes.onchange = () => {
-  const url = filterPokes.value; 
+  const url = filterPokes.value;
   if (url) {
-    getPokesFilter(url); 
+    getPokesFilter(url);
   } else {
-    getPokes("https://pokeapi.co/api/v2/pokemon?limit=20"); 
+    getPokes("https://pokeapi.co/api/v2/pokemon?limit=20");
   }
 };
-
-//get the pokemons by url
+//get the pokes by filter
 async function getPokesFilter(url) {
   try {
     mainPoke.innerHTML = "";
-    //show loader while the async function is waiting the responses from api
     mainPoke.appendChild(loader);
 
     const res = await fetch(url);
-    //Handle first request error
     if (!res.ok) {
       errorHandle(
         "Something went wrong while searching.",
@@ -307,37 +325,21 @@ async function getPokesFilter(url) {
       );
       return;
     }
-    //get the info from all the pokes in the url
+
     const pokesInfo = await res.json();
     console.log(pokesInfo);
 
-    //manage navigations buttons
-    if (!pokesInfo.previous) {
-      previous.classList.add("hiddenNav");
-    } else {
-      previous.classList.remove("hiddenNav");
-      previous.onclick = () => {
-        loadPage(pokesInfo.previous);
-      };
-    }
-    if (!pokesInfo.next) {
-      next.classList.add("hiddenNav");
-    } else {
-      next.classList.remove("hiddenNav");
-      next.onclick = () => {
-        loadPage(pokesInfo.next);
-      };
-    }
-/*
-    //for each result/pokemon make another request and create the cards
-    const responseDetails = pokesInfo.pokemon.pokemon.map(async (poke) => {
-      const res = await fetch(poke.url);
+    previous.classList.add("hiddenNav");
+    next.classList.add("hiddenNav");
+
+    const responseDetails = pokesInfo.pokemon.map(async (poke) => {
+      const res = await fetch(poke.pokemon.url);
       if (!res.ok) {
         return null;
       }
       return res.json();
     });
-    //wait until there is all the details from pokemons
+
     const pokeDetails = await Promise.all(responseDetails);
     mainPoke.innerHTML = "";
 
@@ -346,7 +348,8 @@ async function getPokesFilter(url) {
         errorHandle("Sorry", "Unable to load this Pokémon.", true);
         return;
       }
-       const chartStats = chartPoke(pokeInfo.stats,100);
+
+      const chartStats = chartPoke(pokeInfo.stats, 100);
 
       const card = document.createElement("div");
       card.classList.add("cardPoke");
@@ -374,9 +377,9 @@ async function getPokesFilter(url) {
 
       card.appendChild(infoDiv);
       card.appendChild(img);
-    card.appendChild(chartStats);
+      card.appendChild(chartStats);
       mainPoke.appendChild(card);
-    });*/
+    });
   } catch (error) {
     errorHandle(
       "Something went wrong while loading Pokémons.",
@@ -385,57 +388,11 @@ async function getPokesFilter(url) {
     console.error(error);
   }
 }
-//Search poke
-/*fetch("https://pokeapi.co/api/v2/pokemon/" + value)
-    .then((res) => res.json())
-    .then((data) => {
-      document.getElementById("mainPoke").innerHTML = `
-    <div class="cardPoke" id="${data.id}">
-      <div>
-        <h2>${data.name.toUpperCase()}</h2>
-        <p class="typesPoke">Type(s): <br>${data.types
-          .map(
-            (pokeType) => `<span class="typeName">${pokeType.type.name}</span>`
-          )
-          .join(", ")}</p>
-      </div>
-      <img src="${data.sprites.other["official-artwork"].front_default}" alt="${
-        data.name
-      }">
-    </div>
-  `;
-    })
-    .catch((err) => {
-      document.getElementById("pokeResult").innerHTML =
-        "<p>No Pokémon found with that name or ID. Please enter a different one</p>";
-    });*/
+//change modes ligh/dark
+toggleButton.onclick = () => {
+  document.body.classList.toggle("dark-mode");
 
-//get pokes
-/*fetch("https://pokeapi.co/api/v2/pokemon?limit=20")
-    .then((res) => res.json())
-    .then((data) => {
-      //console.log(data);
-      const pokeListResult = data.results.map((poke) =>
-        fetch(poke.url).then((res) => res.json())
-      );
-
-      Promise.all(pokeListResult).then((pokemonList) => {
-        const mainPoke = document.getElementById("mainPoke");
-        mainPoke.innerHTML = pokemonList
-          .map(
-            (pokemon) =>
-              `<div class="cardPoke" id="${pokemon.id}">
-          <div>
-    <h2>${pokemon.name.toUpperCase()}</h2>
-    <p class="typesPoke">Type(s): <br>${pokemon.types
-      .map((pokeType) => `<span class="typeName">${pokeType.type.name}</span>`)
-      .join(", ")}</p></div>
-    <img src="${
-      pokemon.sprites.other["official-artwork"].front_default
-    }" alt="${pokemon.name}">
-          
-    </div>`
-          )
-          .join("");
-      });
-    });*/
+  const isDark = document.body.classList.contains("dark-mode");
+  icon.src = isDark ? "assets/light.svg" : "assets/dark.svg";
+  localStorage.setItem("theme", isDark ? "dark" : "light");
+};

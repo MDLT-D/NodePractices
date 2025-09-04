@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pokédex</title>
     <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
   </head>
   <body>
     <header>
       <h1>Pokédex</h1>
+
       <form action="" id="searchPokeForm" class="searchPokeForm">
         <input
           type="text"
@@ -19,16 +20,20 @@
         />
         <button type="submit">Search</button>
       </form>
+      <button class="modeColors" id="modeColors">
+        <img src="assets/dark.svg" alt="Toggle Theme" />
+      </button>
     </header>
     <main>
-      <select class="pokeTypesFilter" id="pokeTypesFilter">
-        <option selected value="">All Pokémons</option>
-      </select>
-      <section id="mainPoke">
-        
-      </section>
+      <section id="mainPoke"></section>
       <div class="nav-arrows">
         <img class="previous" src="assets/previous.svg" alt="Previous" />
+        <div class="filterContainer">
+          <label for="pokeTypesFilter">Filter Types:</label>
+          <select class="pokeTypesFilter" id="pokeTypesFilter">
+            <option selected value="">ALL POKÉMONS</option>
+          </select>
+        </div>
         <img class="next" src="assets/next.svg" alt="Next" />
       </div>
     </main>
