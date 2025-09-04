@@ -1,16 +1,19 @@
 const d = document;
-const mainPoke = document.getElementById("mainPoke");
-const mainBody = document.querySelector("main");
-const form = document.getElementById("searchPokeForm");
-const inputForm = document.getElementById("searchValue");
-const loader = document.createElement("img");
+const mainPoke = d.getElementById("mainPoke");
+const mainBody = d.querySelector("main");
+const form = d.getElementById("searchPokeForm");
+const inputForm = d.getElementById("searchValue");
+const loader = d.createElement("img");
 loader.classList.add("loader");
 loader.src = "assets/loader.svg";
-const previous = document.querySelector(".previous");
-const next = document.querySelector(".next");
-const filterPokes = document.querySelector("select");
-const toggleButton = document.getElementById("modeColors");
+const previous = d.querySelector(".previous");
+const next = d.querySelector(".next");
+const filterPokes = d.querySelector("select");
+const toggleButton = d.getElementById("modeColors");
 const icon = toggleButton.querySelector("img");
+const modalPokeDetails = d.getElementById("modalPokeDetails");
+const closeModal = d.getElementById("closeModal");
+const bodyModal = d.getElementById("pokeModalBody");
 //Search form
 form.addEventListener("submit", (e) => {
   e.preventDefault();
@@ -28,14 +31,14 @@ form.addEventListener("submit", (e) => {
 //the principal page is loaded when the page starts
 d.addEventListener("DOMContentLoaded", () => {
   const theme = localStorage.getItem("theme");
-  const toggleButton = document.getElementById("modeColors");
+  const toggleButton = d.getElementById("modeColors");
   const icon = toggleButton.querySelector("img");
 
   if (theme === "dark") {
-    document.body.classList.add("dark-mode");
+    d.body.classList.add("dark-mode");
     icon.src = "assets/light.svg"; // Mostrar ícono de modo claro
   } else {
-    document.body.classList.remove("dark-mode");
+    d.body.classList.remove("dark-mode");
     icon.src = "assets/dark.svg"; // Mostrar ícono de modo oscuro
   }
 
@@ -75,16 +78,16 @@ async function searchPoke(value) {
     const pokeFound = await res.json();
 
     mainPoke.innerHTML = "";
-    const chartStats = chartPoke(pokeFound.stats, 200);
+    const chartStats = chartPoke(pokeFound.stats, 200, false);
     //create the card
-    const card = document.createElement("div");
+    const card = d.createElement("div");
     card.classList.add("cardPokeSearch");
     card.id = pokeFound.id;
-    const infoDiv = document.createElement("div");
-    const title = document.createElement("h2");
+    const infoDiv = d.createElement("div");
+    const title = d.createElement("h2");
     title.textContent = pokeFound.name.toUpperCase();
     title.classList.add("searchTitle");
-    const types = document.createElement("p");
+    const types = d.createElement("p");
     types.classList.add("typesPoke");
     types.innerHTML = `Type(s): <br>${pokeFound.types
       .map((t) => `<span class="typeName">${t.type.name}</span>`)
@@ -93,9 +96,10 @@ async function searchPoke(value) {
     infoDiv.appendChild(title);
     infoDiv.appendChild(types);
 
-    const img = document.createElement("img");
+    const img = d.createElement("img");
     img.classList.add("searchResultImg");
-    img.src = pokeFound.sprites.other["official-artwork"].front_default;
+    img.src = pokeFound.sprites.other["official-artwork"].front_default ||
+    pokeFound.sprites.front_default;
     img.alt = pokeFound.name;
 
     card.appendChild(infoDiv);
@@ -162,18 +166,20 @@ async function getPokes(url) {
         errorHandle("Sorry", "Unable to load this Pokémon.", true);
         return;
       }
-      const chartStats = chartPoke(pokeInfo.stats, 100);
+      const chartStats = chartPoke(pokeInfo.stats, 100, false);
 
-      const card = document.createElement("div");
+      const card = d.createElement("div");
       card.classList.add("cardPoke");
       card.id = pokeInfo.id;
+      card.onclick = () => {
+        getPokeLongInfo(card.id);
+      };
+      const infoDiv = d.createElement("div");
 
-      const infoDiv = document.createElement("div");
-
-      const title = document.createElement("h2");
+      const title = d.createElement("h2");
       title.textContent = pokeInfo.name.toUpperCase();
 
-      const types = document.createElement("p");
+      const types = d.createElement("p");
       types.classList.add("typesPoke");
       types.innerHTML = `Type(s): <br>${pokeInfo.types
         .map((t) => `<span class="typeName">${t.type.name}</span>`)
@@ -182,7 +188,7 @@ async function getPokes(url) {
       infoDiv.appendChild(title);
       infoDiv.appendChild(types);
 
-      const img = document.createElement("img");
+      const img = d.createElement("img");
       img.src =
         pokeInfo.sprites.other["official-artwork"].front_default ||
         pokeInfo.sprites.front_default;
@@ -208,12 +214,12 @@ function loadPage(url) {
 }
 //a card for the errors
 function errorHandle(title, description, getFlag) {
-  const card = document.createElement("div");
+  const card = d.createElement("div");
   card.classList.add("cardPokeSearch");
-  const errorParagraphTitle = document.createElement("h2");
+  const errorParagraphTitle = d.createElement("h2");
   errorParagraphTitle.classList.add("errorTitle");
   errorParagraphTitle.textContent = title;
-  const errorParagraphDescription = document.createElement("span");
+  const errorParagraphDescription = d.createElement("span");
   errorParagraphDescription.classList.add("errorDescription");
   errorParagraphDescription.textContent = description;
   card.appendChild(errorParagraphTitle);
@@ -227,14 +233,17 @@ function errorHandle(title, description, getFlag) {
   }
   mainPoke.appendChild(card);
 }
-//make the chart for values
-function chartPoke(stats, size) {
-  const chartSpace = document.createElement("canvas");
+
+function chartPoke(stats, size, descriptionComplete) {
+  const chartSpace = d.createElement("canvas");
+
+  // si no queremos descripción completa, usamos tamaño fijo
   chartSpace.width = size;
-  //get the sections and values
+  chartSpace.height = size;
+
+  // get the sections and values
   const sections = stats.map((st) => st.stat.name.toUpperCase());
   const values = stats.map((st) => st.base_stat);
-  //manage a scale of colors
   const bgColors = [];
   const borderColors = [];
   const firstRed = 120;
@@ -245,11 +254,13 @@ function chartPoke(stats, size) {
     bgColors.push(`rgba(${red}, 0, 0,0.8)`);
     borderColors.push(`rgba(255, 255, 255)`);
   }
-  //chart
+
+  // chart data
   const data = {
     labels: sections,
     datasets: [
       {
+        label: "Stats",
         data: values,
         backgroundColor: bgColors,
         borderColor: borderColors,
@@ -258,26 +269,59 @@ function chartPoke(stats, size) {
     ],
   };
 
-  const config = {
-    type: "pie",
-    data: data,
-    options: {
-      responsive: false,
-      plugins: {
-        legend: {
-          display: false,
+  if (descriptionComplete === true) {
+    const config = {
+      type: "bar",
+      data: data,
+      options: {
+        responsive: false,
+        plugins: {
+          legend: {
+            display: true,
+            position: "bottom",
+          },
+          title: {
+            display: true,
+            text: "Pokémon Stats",
+            font: { size: 18 },
+          },
+          tooltip: {
+            enabled: true,
+          },
         },
-        title: {
-          display: false,
-          text: "Pokémon Stats",
+        scales: {
+          y: {
+            beginAtZero: true,
+            suggestedMax: 150,
+          },
         },
       },
-    },
-  };
+    };
+    new Chart(chartSpace.getContext("2d"), config);
+  } else {
+    const config = {
+      type: "pie",
+      data: data,
+      options: {
+        responsive: false,
+        plugins: {
+          legend: {
+            display: false,
+            position: "bottom",
+          },
+          title: {
+            display: false,
+            text: "Pokémon Stats",
+          },
+        },
+      },
+    };
+    new Chart(chartSpace.getContext("2d"), config);
+  }
 
-  new Chart(chartSpace.getContext("2d"), config);
   return chartSpace;
 }
+
 //get the types that have at least 1 pokemon
 async function getTypesPokes() {
   //get the types
@@ -296,7 +340,7 @@ async function getTypesPokes() {
 
   // add the types to the select
   validTypes.forEach((type) => {
-    const option = document.createElement("option");
+    const option = d.createElement("option");
     option.value = type.url;
     option.textContent = type.name.toUpperCase();
     filterPokes.appendChild(option);
@@ -349,18 +393,18 @@ async function getPokesFilter(url) {
         return;
       }
 
-      const chartStats = chartPoke(pokeInfo.stats, 100);
+      const chartStats = chartPoke(pokeInfo.stats, 100, false);
 
-      const card = document.createElement("div");
+      const card = d.createElement("div");
       card.classList.add("cardPoke");
       card.id = pokeInfo.id;
 
-      const infoDiv = document.createElement("div");
+      const infoDiv = d.createElement("div");
 
-      const title = document.createElement("h2");
+      const title = d.createElement("h2");
       title.textContent = pokeInfo.name.toUpperCase();
 
-      const types = document.createElement("p");
+      const types = d.createElement("p");
       types.classList.add("typesPoke");
       types.innerHTML = `Type(s): <br>${pokeInfo.types
         .map((t) => `<span class="typeName">${t.type.name}</span>`)
@@ -369,7 +413,7 @@ async function getPokesFilter(url) {
       infoDiv.appendChild(title);
       infoDiv.appendChild(types);
 
-      const img = document.createElement("img");
+      const img = d.createElement("img");
       img.src =
         pokeInfo.sprites.other["official-artwork"].front_default ||
         pokeInfo.sprites.front_default;
@@ -390,9 +434,97 @@ async function getPokesFilter(url) {
 }
 //change modes ligh/dark
 toggleButton.onclick = () => {
-  document.body.classList.toggle("dark-mode");
+  d.body.classList.toggle("dark-mode");
 
-  const isDark = document.body.classList.contains("dark-mode");
+  const isDark = d.body.classList.contains("dark-mode");
   icon.src = isDark ? "assets/light.svg" : "assets/dark.svg";
   localStorage.setItem("theme", isDark ? "dark" : "light");
+};
+
+async function getPokeLongInfo(idPoke) {
+  const res = await fetch("https://pokeapi.co/api/v2/pokemon/" + idPoke);
+  if (res.status === 400) {
+    errorHandle("Invalid search.", "Please enter a Pokémon name or ID.");
+    return;
+  }
+  if (res.status === 404) {
+    errorHandle(
+      `No Pokémon found for "${value}".`,
+      "Please check the name or ID and try again."
+    );
+    return;
+  }
+  if (!res.ok) {
+    errorHandle(
+      "Something went wrong while searching.",
+      "Please try again later."
+    );
+    return;
+  }
+  const pokeFound = await res.json();
+  console.log(pokeFound);
+
+  modalPokeDetails.classList.add("show");
+  d.body.style.overflow = "hidden";
+
+ //clear the modal
+  bodyModal.innerHTML = "";
+
+  // Chart
+  const chartStats = chartPoke(pokeFound.stats, 300, true);
+
+  const infoDiv = d.createElement("div");
+  bodyModal.classList.add("modalOrg");
+  const title = d.createElement("h2");
+  title.textContent = pokeFound.name.toUpperCase();
+  title.classList.add("searchTitle");
+
+  const types = d.createElement("p");
+  types.classList.add("typesPoke");
+  types.innerHTML = `Type(s): <br>${pokeFound.types
+    .map((t) => `<span class="typeName">${t.type.name}</span>`)
+    .join(", ")}`;
+
+  // Height y weight
+  const hw = d.createElement("p");
+  hw.classList.add("typesPoke");
+  hw.innerHTML = `
+  Height:<span class="typeName">${pokeFound.height/10} m</span> <br>
+  Weight:<span class="typeName">${pokeFound.weight/10} kg</span>
+`;
+
+  const abilities = d.createElement("p");
+   abilities.classList.add("abilitiesPoke");
+  abilities.innerHTML = `
+  Abilities:<br>
+  ${pokeFound.abilities
+    .map((ab) => `<span class="abilityName">${ab.ability.name}</span>`)
+    .join(", ")}
+`;
+
+
+  const img = d.createElement("img");
+  img.classList.add("imgModal");
+  img.src =
+    pokeFound.sprites.other.home.front_default ||
+    pokeFound.sprites.other["official-artwork"].front_default ||
+    pokeFound.sprites.front_default;
+  img.alt = pokeFound.name;
+
+  // Append al modal
+  infoDiv.appendChild(title);
+  infoDiv.appendChild(types);
+  infoDiv.appendChild(hw);
+  infoDiv.appendChild(abilities);
+
+  bodyModal.appendChild(infoDiv);
+  bodyModal.appendChild(img);
+  bodyModal.appendChild(chartStats);
+}
+
+closeModal.onclick = () => {
+  modalPokeDetails.classList.remove("show");
+  modalPokeDetails.classList.add("hiddenModal");
+  d.body.style.overflow = "";
+  bodyModal.innerHTML = "";
 };

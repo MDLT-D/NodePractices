@@ -1,3 +1,4 @@
+/*color configuration for dark/light mode*/
 :root {
   --primary-color: #ffffff;
   --header-bg: #ff0000;
@@ -16,6 +17,7 @@
   --error-title: #750000;
   --error-bg: #fff0f0;
   --error-description: #000000;
+  --background-modal: rgba(0,0,0,0.6);
 }
 
 body.dark-mode {
@@ -36,6 +38,7 @@ body.dark-mode {
   --error-title: #ff9999;
   --error-bg: #2b2b2b;
   --error-description: #ffffff;
+  --background-modal:rgba(82, 82, 82,0.8);
 }
 
 html,
@@ -47,6 +50,12 @@ body {
   color: var(--button-text);
   font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
 }
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+/*Header, button mode and form to search*/
 header {
   background-color: var(--header-bg);
   color: var(--primary-color);
@@ -70,77 +79,11 @@ h1 {
   color: white;
 }
 
-h2 {
-  color: var(--poke-title);
-}
-img {
-  width: 150px;
-}
-main {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.cardPoke,
-.cardPokeSearch,
-.searchPokeForm {
-  background-color: var(--poke-card-bg);
-}
-
-.cardPoke {
-  display: flex;
-  align-items: center;
-  text-align: center;
-  justify-content: space-around;
-  border-radius: 20px;
-  width: 450px;
-}
-.cardPokeSearch {
-  display: flex;
-  align-items: center;
-  text-align: center;
-  justify-content: space-around;
-  border-radius: 20px;
-  width: 700px;
-}
-
-.searchResultImg {
-  width: 250px;
-}
-
-.searchTitle {
-  font-size: 32px;
-}
-.searchTitle + .typesPoke {
-  font-size: 1.4em;
-}
 .searchPokeForm {
   align-items: center;
   justify-content: center;
   padding: 10px;
   border-radius: 20px;
-}
-.errorTitle {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--error-title);
-}
-
-.errorDescription {
-  font-size: 18px;
-  font-weight: 400;
-  padding: 20px;
-  color: var(--error-description);
-}
-
-.lineError {
-  flex-direction: column;
-  gap: 0px;
-}
-
-.getPokesSize {
-  font-size: 18px;
 }
 input {
   border: none;
@@ -170,6 +113,7 @@ button {
 button:hover {
   box-shadow: 0 4px 12px var(--nav-arrow-shadow-hover);
 }
+/*Button to switch light/dark mode*/
 
 .modeColors img {
   width: 24px;
@@ -191,6 +135,77 @@ button:hover {
   margin-left: 24px;
 }
 
+/* basic cards*/
+h2 {
+  color: var(--poke-title);
+}
+img {
+  width: 150px;
+}
+
+.cardPoke {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  justify-content: space-around;
+  border-radius: 20px;
+  width: 450px;
+}
+
+.cardPoke,
+.cardPokeSearch,
+.searchPokeForm {
+  background-color: var(--poke-card-bg);
+}
+.typesPoke, .abilitiesPoke {
+  font-weight: 400;
+  color: var(--poke-title);
+}
+.typeName, .abilityName {
+  font-weight: bold;
+  color: var(--type-bold);
+}
+/*search card*/
+.cardPokeSearch {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  justify-content: space-around;
+  border-radius: 20px;
+  width: 700px;
+}
+
+.searchResultImg {
+  width: 250px;
+}
+
+.searchTitle {
+  font-size: 32px;
+}
+.searchTitle + .typesPoke {
+  font-size: 1.4em;
+}
+/*error handling*/
+.errorTitle {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--error-title);
+}
+
+.errorDescription {
+  font-size: 18px;
+  font-weight: 400;
+  padding: 20px;
+  color: var(--error-description);
+}
+
+.lineError {
+  flex-direction: column;
+  gap: 0px;
+}
+
+
+/*distribution main*/
 #mainPoke {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -207,24 +222,18 @@ button:hover {
   grid-column: 1 / -1;
   justify-self: center;
 }
-
+/*loader changes*/
 .loader {
   filter: none;
   transition: filter 0.3s ease;
 }
 
 body.dark-mode .loader {
-  filter: invert(1); /* Cambia negro a blanco */
+  filter: invert(1); 
 }
 
-.typesPoke {
-  font-weight: 400;
-  color: var(--poke-title);
-}
-.typeName {
-  font-weight: bold;
-  color: var(--type-bold);
-}
+/*navigation bar and filter*/
+/*arrow buttons*/
 .previous,
 .next {
   width: 48px;
@@ -261,6 +270,7 @@ body.dark-mode .loader {
 .hiddenNav {
   visibility: hidden;
 }
+
 .nav-arrows {
   position: fixed;
   left: 0;
@@ -282,11 +292,7 @@ body.dark-mode .loader {
   width: 48px;
   height: 48px;
 }
-
-.littleChart {
-  width: 100px;
-}
-
+/*filter selected*/
 select {
   padding: 10px;
   border-radius: 20px;
@@ -301,6 +307,59 @@ select {
   align-items: center;
   gap: 5px;
 }
+
+/*Modal features*/
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color:var(--background-modal);
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  display: none; 
+}
+
+.modal.show {
+  display: flex;  
+}
+
+.hiddenModal {
+  display: none;
+}
+
+.modalPokeContent {
+  background-color: var(--poke-card-bg);
+  padding: 1.5rem;
+  border-radius: 10px;
+  width: 70%;
+  max-width: 90%;
+  max-height: 90vh;   /* altura máxima relativa a la ventana */
+  overflow-y: auto;   /* activa scroll vertical si excede la altura */
+  color: white;
+  box-shadow: 0 2px 10px var(--nav-arrow-shadow-hover);
+}
+
+.close {
+  cursor: pointer;
+  float: right;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.imgModal {
+  width: 250px;
+}
+.modalOrg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  align-items: flex-center;
+}
+
 @media (max-width: 900px) {
   #mainPoke {
     max-width: 98vw;
@@ -320,7 +379,19 @@ select {
     max-width: 100%;
     height: auto;
   }
+  .modalPokeContent {
+    width: 80%;
+    max-height: 80vh;
+  }
+  .imgModal {
+    width: 200px;
+  }
+  .modalOrg {
+    flex-direction: column;
+    align-items: center;
+  }
 }
+
 
 @media (max-width: 700px) {
   header {
@@ -399,5 +470,16 @@ select {
     margin-left: 0;
     margin-top: 12px;
     align-self: stretch;
+  }
+  .modalPokeContent {
+    width: 90%;
+    padding: 1rem;
+    max-height: 90vh;
+  }
+  .imgModal {
+    width: 150px;
+  }
+  .modalOrg {
+    gap: 0.5rem;
   }
 }
