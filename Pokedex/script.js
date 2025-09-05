@@ -57,21 +57,27 @@ async function searchPoke(value) {
     mainPoke.innerHTML = "";
     //Handle status errors
     if (res.status === 400) {
-      errorHandle("Invalid search.", "Please enter a Pokémon name or ID.");
+      const card = errorHandle(
+        "Invalid search.",
+        "Please enter a Pokémon name or ID."
+      );
+      mainPoke.appendChild(card);
       return;
     }
     if (res.status === 404) {
-      errorHandle(
+      const card = errorHandle(
         `No Pokémon found for "${value}".`,
         "Please check the name or ID and try again."
       );
+      mainPoke.appendChild(card);
       return;
     }
     if (!res.ok) {
-      errorHandle(
+      const card = errorHandle(
         "Something went wrong while searching.",
         "Please try again later."
       );
+      mainPoke.appendChild(card);
       return;
     }
     //get the pokemon values
@@ -83,6 +89,9 @@ async function searchPoke(value) {
     const card = d.createElement("div");
     card.classList.add("cardPokeSearch");
     card.id = pokeFound.id;
+    card.onclick = () => {
+      getPokeLongInfo(card.id);
+    };
     const infoDiv = d.createElement("div");
     const title = d.createElement("h2");
     title.textContent = pokeFound.name.toUpperCase();
@@ -91,15 +100,16 @@ async function searchPoke(value) {
     types.classList.add("typesPoke");
     types.innerHTML = `Type(s): <br>${pokeFound.types
       .map((t) => `<span class="typeName">${t.type.name}</span>`)
-      .join(", ")}`;
+      .join("<br>")}`;
 
     infoDiv.appendChild(title);
     infoDiv.appendChild(types);
 
     const img = d.createElement("img");
     img.classList.add("searchResultImg");
-    img.src = pokeFound.sprites.other["official-artwork"].front_default ||
-    pokeFound.sprites.front_default;
+    img.src =
+      pokeFound.sprites.other["official-artwork"].front_default ||
+      pokeFound.sprites.front_default;
     img.alt = pokeFound.name;
 
     card.appendChild(infoDiv);
@@ -107,7 +117,11 @@ async function searchPoke(value) {
     card.appendChild(chartStats);
     mainPoke.appendChild(card);
   } catch (error) {
-    errorHandle("Unexpected Internal Error", "Please try again later.");
+    const card = errorHandle(
+      "Unexpected Internal Error",
+      "Please try again later."
+    );
+    mainPoke.appendChild(card);
     console.error({ error });
   }
 }
@@ -121,10 +135,11 @@ async function getPokes(url) {
     const res = await fetch(url);
     //Handle first request error
     if (!res.ok) {
-      errorHandle(
+      const card = errorHandle(
         "Something went wrong while searching.",
         "Please try again later."
       );
+      mainPoke.appendChild(card);
       return;
     }
     //get the info from all the pokes in the url
@@ -163,7 +178,8 @@ async function getPokes(url) {
 
     pokeDetails.forEach((pokeInfo) => {
       if (!pokeInfo) {
-        errorHandle("Sorry", "Unable to load this Pokémon.", true);
+        const card = errorHandle("Sorry", "Unable to load this Pokémon.", true);
+        mainPoke.appendChild(card);
         return;
       }
       const chartStats = chartPoke(pokeInfo.stats, 100, false);
@@ -183,7 +199,7 @@ async function getPokes(url) {
       types.classList.add("typesPoke");
       types.innerHTML = `Type(s): <br>${pokeInfo.types
         .map((t) => `<span class="typeName">${t.type.name}</span>`)
-        .join(", ")}`;
+        .join("<br>")}`;
 
       infoDiv.appendChild(title);
       infoDiv.appendChild(types);
@@ -200,10 +216,11 @@ async function getPokes(url) {
       mainPoke.appendChild(card);
     });
   } catch (error) {
-    errorHandle(
+    const card = errorHandle(
       "Something went wrong while loading Pokémons.",
       "Please try again later."
     );
+    mainPoke.appendChild(card);
     console.error(error);
   }
 }
@@ -231,7 +248,7 @@ function errorHandle(title, description, getFlag) {
     errorParagraphTitle.classList.add("getPokesSize");
     errorParagraphDescription.classList.add("getPokesSize");
   }
-  mainPoke.appendChild(card);
+  return card;
 }
 
 function chartPoke(stats, size, descriptionComplete) {
@@ -363,10 +380,11 @@ async function getPokesFilter(url) {
 
     const res = await fetch(url);
     if (!res.ok) {
-      errorHandle(
+      const card = errorHandle(
         "Something went wrong while searching.",
         "Please try again later."
       );
+      mainPoke.appendChild(card);
       return;
     }
 
@@ -389,7 +407,8 @@ async function getPokesFilter(url) {
 
     pokeDetails.forEach((pokeInfo) => {
       if (!pokeInfo) {
-        errorHandle("Sorry", "Unable to load this Pokémon.", true);
+        const card = errorHandle("Sorry", "Unable to load this Pokémon.", true);
+        mainPoke.appendChild(card);
         return;
       }
 
@@ -398,7 +417,9 @@ async function getPokesFilter(url) {
       const card = d.createElement("div");
       card.classList.add("cardPoke");
       card.id = pokeInfo.id;
-
+      card.onclick = () => {
+        getPokeLongInfo(card.id);
+      };
       const infoDiv = d.createElement("div");
 
       const title = d.createElement("h2");
@@ -408,7 +429,7 @@ async function getPokesFilter(url) {
       types.classList.add("typesPoke");
       types.innerHTML = `Type(s): <br>${pokeInfo.types
         .map((t) => `<span class="typeName">${t.type.name}</span>`)
-        .join(", ")}`;
+        .join("<br>")}`;
 
       infoDiv.appendChild(title);
       infoDiv.appendChild(types);
@@ -425,10 +446,11 @@ async function getPokesFilter(url) {
       mainPoke.appendChild(card);
     });
   } catch (error) {
-    errorHandle(
+    const card = errorHandle(
       "Something went wrong while loading Pokémons.",
       "Please try again later."
     );
+    mainPoke.appendChild(card);
     console.error(error);
   }
 }
@@ -440,69 +462,70 @@ toggleButton.onclick = () => {
   icon.src = isDark ? "assets/light.svg" : "assets/dark.svg";
   localStorage.setItem("theme", isDark ? "dark" : "light");
 };
-
+//get info for the poke modal
 async function getPokeLongInfo(idPoke) {
+  //get info of poke by id
   const res = await fetch("https://pokeapi.co/api/v2/pokemon/" + idPoke);
-  if (res.status === 400) {
-    errorHandle("Invalid search.", "Please enter a Pokémon name or ID.");
-    return;
-  }
-  if (res.status === 404) {
-    errorHandle(
-      `No Pokémon found for "${value}".`,
-      "Please check the name or ID and try again."
-    );
-    return;
-  }
+  //handle error
   if (!res.ok) {
-    errorHandle(
+    //show modal
+    modalPokeDetails.classList.add("show");
+    d.body.style.overflow = "hidden";
+
+    bodyModal.innerHTML = "";
+    //error msg
+    const card = errorHandle(
       "Something went wrong while searching.",
       "Please try again later."
     );
+    bodyModal.appendChild(card);
     return;
   }
+  //get the info of poke
   const pokeFound = await res.json();
-  console.log(pokeFound);
-
+  //show modal
   modalPokeDetails.classList.add("show");
   d.body.style.overflow = "hidden";
-
- //clear the modal
-  bodyModal.innerHTML = "";
-
   // Chart
   const chartStats = chartPoke(pokeFound.stats, 300, true);
-
+  //estructure modal
   const infoDiv = d.createElement("div");
   bodyModal.classList.add("modalOrg");
   const title = d.createElement("h2");
   title.textContent = pokeFound.name.toUpperCase();
   title.classList.add("searchTitle");
+  const dataContainer = d.createElement("div");
+  dataContainer.classList.add("dataContainer");
 
+  // Types
   const types = d.createElement("p");
   types.classList.add("typesPoke");
   types.innerHTML = `Type(s): <br>${pokeFound.types
-    .map((t) => `<span class="typeName">${t.type.name}</span>`)
-    .join(", ")}`;
+    .map((t) => `<span class="typeName">• ${t.type.name}</span>`)
+    .join("<br>")}`;
 
   // Height y weight
   const hw = d.createElement("p");
   hw.classList.add("typesPoke");
-  hw.innerHTML = `
-  Height:<span class="typeName">${pokeFound.height/10} m</span> <br>
-  Weight:<span class="typeName">${pokeFound.weight/10} kg</span>
+  hw.innerHTML = `Dimensions: <br>
+  <span class="typeName">Height: ${pokeFound.height / 10} m</span> <br>
+  <span class="typeName">Weight: ${pokeFound.weight / 10} kg</span>
 `;
 
+  // Abilities
   const abilities = d.createElement("p");
-   abilities.classList.add("abilitiesPoke");
+  abilities.classList.add("abilitiesPoke");
   abilities.innerHTML = `
   Abilities:<br>
   ${pokeFound.abilities
-    .map((ab) => `<span class="abilityName">${ab.ability.name}</span>`)
-    .join(", ")}
+    .map((ab) => `<span class="abilityName">• ${ab.ability.name}</span>`)
+    .join("<br>")}
 `;
 
-
+  dataContainer.appendChild(types);
+  dataContainer.appendChild(hw);
+  dataContainer.appendChild(abilities);
+  //img of pokemon
   const img = d.createElement("img");
   img.classList.add("imgModal");
   img.src =
@@ -510,18 +533,15 @@ async function getPokeLongInfo(idPoke) {
     pokeFound.sprites.other["official-artwork"].front_default ||
     pokeFound.sprites.front_default;
   img.alt = pokeFound.name;
-
-  // Append al modal
+  //appends
   infoDiv.appendChild(title);
-  infoDiv.appendChild(types);
-  infoDiv.appendChild(hw);
-  infoDiv.appendChild(abilities);
+  infoDiv.appendChild(dataContainer);
 
   bodyModal.appendChild(infoDiv);
   bodyModal.appendChild(img);
   bodyModal.appendChild(chartStats);
 }
-
+//close the modal and clear
 closeModal.onclick = () => {
   modalPokeDetails.classList.remove("show");
   modalPokeDetails.classList.add("hiddenModal");

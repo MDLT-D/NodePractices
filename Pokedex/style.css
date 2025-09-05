@@ -18,6 +18,7 @@
   --error-bg: #fff0f0;
   --error-description: #000000;
   --background-modal: rgba(0,0,0,0.6);
+  --info-contain:rgba(245, 73, 39,0.3);
 }
 
 body.dark-mode {
@@ -320,6 +321,7 @@ select {
   justify-content: center;
   z-index: 100;
   display: none; 
+ 
 }
 
 .modal.show {
@@ -329,6 +331,31 @@ select {
 .hiddenModal {
   display: none;
 }
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--background-modal);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.95);
+  transition: opacity 0.4s ease, transform 0.4s ease, visibility 0s linear 0.4s;
+  z-index: 1000;
+}
+
+.modal.show {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+  transition: opacity 0.4s ease, transform 0.4s ease, visibility 0s linear 0s;
+}
+
 
 .modalPokeContent {
   background-color: var(--poke-card-bg);
@@ -341,16 +368,22 @@ select {
   color: white;
   box-shadow: 0 2px 10px var(--nav-arrow-shadow-hover);
 }
-
+.dataContainer{
+  background-color: var(--info-contain);
+  padding: 5px 20px;
+  
+  border-radius: 20px;
+}
 .close {
   cursor: pointer;
   float: right;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: bold;
+  color: var(--text-colors);
 }
 
 .imgModal {
-  width: 250px;
+  width: 300px;
 }
 .modalOrg {
   display: flex;
