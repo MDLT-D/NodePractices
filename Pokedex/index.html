@@ -4,46 +4,45 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pokédex</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
   </head>
   <body>
-    <h1>Pokédex</h1>
-    <section id="searchPoke">
-      <form action="" id="searchPokeForm">
+    <header>
+      <h1>Pokédex</h1>
+
+      <form action="" id="searchPokeForm" class="searchPokeForm">
         <input
           type="text"
-          placeholder="Pokemon name or ID."
+          placeholder="Pokémon name or ID."
           id="searchValue"
-          required
+          maxlength="20"
         />
         <button type="submit">Search</button>
       </form>
-      <div id="pokeResult"></div>
-    </section>
-    <script>
-      const form = document.getElementById("searchPokeForm");
-
-      form.addEventListener("submit", (event) => {
-        event.preventDefault();
-        const value = document
-          .getElementById("searchValue")
-          .value.toLowerCase()
-          .trim();
-        if (!value) return;
-
-        fetch("https://pokeapi.co/api/v2/pokemon/" + value)
-          .then((res) => res.json())
-          .then((data) => {
-            document.getElementById("pokeResult").innerHTML = `
-          <h2>${data.name}</h2>
-          <img src="${data.sprites.front_default}" alt="${data.name}">
-          <p>Type(s): ${data.types.map((pokeType) => pokeType.type.name).join(", ")}</p>
-        `;
-          })
-          .catch((err) => {
-            document.getElementById("pokeResult").innerHTML =
-              "<p>No Pokémon found with that name or ID. Please enter a different one</p>";
-          });
-      });
-    </script>
+      <button class="modeColors" id="modeColors">
+        <img src="assets/dark.svg" alt="Toggle Theme" />
+      </button>
+    </header>
+    <main>
+      <section id="mainPoke"></section>
+      <div class="nav-arrows">
+        <img class="previous" src="assets/previous.svg" alt="Previous" />
+        <div class="filterContainer">
+          <label for="pokeTypesFilter">Filter Types:</label>
+          <select class="pokeTypesFilter" id="pokeTypesFilter">
+            <option selected value="">ALL POKÉMONS</option>
+          </select>
+        </div>
+        <img class="next" src="assets/next.svg" alt="Next" />
+      </div>
+    </main>
+    <div id="modalPokeDetails" class=" hiddenModal modal">
+       <div class="modalPokeContent">
+      <span id="closeModal" class="close">X</span>
+      <div id="pokeModalBody"></div>
+    </div>
+    </div>
+    <script src="script.js"></script>
   </body>
 </html>
