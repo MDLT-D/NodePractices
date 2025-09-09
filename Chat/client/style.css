@@ -1,59 +1,177 @@
-
-:root{
-    --primary-color:#B5D4C7;
-    --secondary-color:#355C4C;
-    --thirdy-color:#5DA285;
+:root {
+  --primary-color: #b5d4c7;
+  --secondary-color: #355c4c;
+  --thirdy-color: #5da285;
+  --other--msgs: #cee9dc;
+  --background-modal: rgba(0, 0, 0, 0.9);
+}
+/*Basic features*/
+html,
+body {
+  background-color: var(--primary-color);
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
 }
 
-body{
-    background-color:var(--primary-color);
-    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-display: flex;
-flex-direction: column;
-align-items: center;
+h1 {
+  padding: 5px;
+  margin: 0;
+  color: var(--thirdy-color);
 }
-
-h1{
-    padding: 5px;
-    margin: 0;
-    color: var(--thirdy-color);
-}
-
+/*chat*/
 .chatSpace {
-    background-color:var(--secondary-color) ;
-    border-radius: 15px;
-    width: 60%;
-    height: 85vh;
-    display: flex;
-    flex-direction: column;
-   box-shadow: 0px 0px 18px 2px rgba(48, 47, 47, 0.76);
+  background-color: var(--secondary-color);
+  border-radius: 15px;
+  width: 100%;
+  max-width: 500px;
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0px 0px 18px 2px rgba(48, 47, 47, 0.76);
+  overflow: hidden;
 }
 
 .messagesSpace {
-    flex: 1;
-    overflow-y: auto;
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .formChat {
-    display: flex;
-    padding: 10px;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
+  display: flex;
+  padding: 10px;
+  gap: 10px;
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .messageInput {
-    flex: 1;
-    padding: 10px;
-    border-radius: 15px;
-    border: none;
-    max-width: 50%;
+  flex: 1;
+  padding: 12px;
+  border-radius: 20px;
+  border: none;
+  outline: none;
 }
 
 .messageButton {
-    padding: 10px 20px;
-    border-radius: 15px;
-    border: none;
-    background-color: var(--primary-color);
-    
+  padding: 12px 20px;
+  border-radius: 20px;
+  border: none;
+  background-color: var(--primary-color);
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.messageButton:hover {
+  background-color: var(--thirdy-color);
+  color: white;
+}
+/*ormat list*/
+li {
+  padding: 10px 15px;
+  background-color: var(--other--msgs);
+  color: var(--secondary-color);
+  font-size: 14px;
+  border-radius: 15px;
+  max-width: 70%;
+  overflow-wrap: break-word;
+  list-style: none;
+}
+.msgUsername {
+  font-weight: 700;
+}
+
+.message-other {
+  align-self: flex-start;
+  margin-left: 30px;
+}
+
+.message-me {
+  align-self: flex-end;
+  background-color: var(--thirdy-color);
+  color: white;
+  margin-right: 30px;
+}
+/* name modal*/
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--background-modal);
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+
+  display: flex;
+}
+
+.hiddenModal {
+  display: none;
+}
+
+.nameForm {
+  width: 30%;
+  background-color: var(--other--msgs);
+  padding: 30px;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--secondary-color);
+}
+
+.nameInput {
+  width: 60%;
+  border-radius: 10px;
+  border: none;
+  text-align: center;
+  padding: 10px 0px;
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.formButton {
+  width: 30%;
+  min-width: 100px;
+}
+
+/* alerts*/
+
+.notifications {
+  position: fixed;
+  top: 20px;
+ align-items: center;
+ justify-content: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 999;
+}
+
+.notification {
+  padding: 10px 20px;
+  border-radius: 8px;
+  background-color: #355c4c;
+  color: white;
+  font-weight: bold;
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: all 0.3s ease;
+}
+
+.notification.show {
+  opacity: 1;
+  transform: translateY(0);
 }

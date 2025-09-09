@@ -9,6 +9,8 @@
 
 </head>
 <body>
+    <div id="notifications" class="notifications"></div>
+
     <h1>MDLT CHAT</h1>
     <section id="chatSpace" class="chatSpace" >
         <ul id="messagesSpace" class="messagesSpace">
@@ -19,6 +21,14 @@
             <button id="messageButton" class="messageButton" type="submit">Send</button>
         </form>
     </section>
+
+      <div id="nameModal" class="modal">
+    <form id="nameForm" class="nameForm">
+      <label for="nameInput">Choose a name to enter the chat:</label>
+      <input id="nameInput" class="nameInput" type="text" placeholder="Your name" maxlength="20" />
+      <button type="submit" class="formButton messageButton">Enter Chat</button>
+    </form>
+  </div>
    <script type="module" src="script.js"></script>
 
 </body>

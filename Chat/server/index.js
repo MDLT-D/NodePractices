@@ -7,16 +7,39 @@ const port = process.env.PORT ?? 3000;
 const app = express();
 const server = createServer(app);
 const io = new Server(server);
-io.on("connection", (socket) => {
-  console.log("a user connected");
 
-  socket.on("disconnect", () => {
-    console.log("a user disconnected");
+// active usernames
+const activeUsers = new Set();
+
+//new connection and validate the users
+io.on("connection", (socket) => {
+//  console.log("A user connected");
+  io.emit("connected");
+
+  socket.on("set username", (username, response) => {
+    username = username.trim();
+    if (activeUsers.has(username)) {
+     
+      response({ ok: false});
+    } else {
+      socket.username = username;
+      activeUsers.add(username);
+      response({ ok: true });
+    }
   });
 
-  socket.on("chat message", (msg) => {
-    //console.log("message: " + msg);
-    io.emit('chat message',msg)
+//new msg
+  socket.on("chat message", (messageInfo) => {
+    io.emit("chat message", messageInfo); 
+  });
+
+  //disconnection user
+  socket.on("disconnect", () => {
+    if (socket.username) {
+      activeUsers.delete(socket.username);
+    }
+    io.emit("disconnected");
+  //  console.log("A user disconnected");
   });
 });
 
