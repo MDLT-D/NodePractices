@@ -244,9 +244,11 @@ main{
   display: flex;
   justify-content: center;
   gap: 10px;
-  width: 60%;
+  width: 50%;
   margin: 0;
   align-items: center;
+  background-color: white;
+  padding: 5px;
 }
 
 .activeUsersList{

@@ -1,55 +1,70 @@
 <!DOCTYPE html>
 <html lang="en-EN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MDLT Chat</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
     <div id="notifications" class="notifications"></div>
-<header id="header">
-    <h1>MDLT CHAT</h1>
-    <div id="userInfo" class="userInfo">
-      <svg  width="800px" height="800px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.579 2 2 6.579 2 12s4.579 10 10 10 10-4.579 10-10S17.421 2 12 2zm0 5c1.727 0 3 1.272 3 3s-1.273 3-3 3c-1.726 0-3-1.272-3-3s1.274-3 3-3zm-5.106 9.772c.897-1.32 2.393-2.2 4.106-2.2h2c1.714 0 3.209.88 4.106 2.2C15.828 18.14 14.015 19 12 19s-3.828-.86-5.106-2.228z"/></svg>
- <label id="username" class="username"></label>
-    </div>
-   
-</header>
-<main>
-  <section id="usersSpace" class="chatSpace usersSpace" >
+    <header id="header">
+      <h1>MDLT CHAT</h1>
+      <div id="userInfo" class="userInfo">
+        <svg
+          width="800px"
+          height="800px"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M12 2C6.579 2 2 6.579 2 12s4.579 10 10 10 10-4.579 10-10S17.421 2 12 2zm0 5c1.727 0 3 1.272 3 3s-1.273 3-3 3c-1.726 0-3-1.272-3-3s1.274-3 3-3zm-5.106 9.772c.897-1.32 2.393-2.2 4.106-2.2h2c1.714 0 3.209.88 4.106 2.2C15.828 18.14 14.015 19 12 19s-3.828-.86-5.106-2.228z"
+          />
+        </svg>
+        <label id="username" class="username"></label>
+      </div>
+    </header>
+    <main>
+      <section id="usersSpace" class="chatSpace usersSpace">
         <div id="activeUsers" class="activeUsers">
-        <h2>Active Users</h2>
-
-      </div>
-      <ul id="activeUsersList" class="activeUsersList">
-
-      </ul>
-    </section>
-    <section id="chatSpace" class="chatSpace" >
-      <div id="chatName" class="chatName">
-        <h2>General Chat</h2>
-      </div>
-        <ul id="messagesSpace" class="messagesSpace">
-
-
-        </ul>
+          <h2>Active Users</h2>
+        </div>
+        <ul id="activeUsersList" class="activeUsersList"></ul>
+      </section>
+      <section id="chatSpace" class="chatSpace">
+        <div id="chatName" class="chatName">
+          <h2 id="chatTitle"">General Chat</h2>
+        </div>
+        <ul id="messagesSpace" class="messagesSpace"></ul>
         <form id="formChat" class="formChat">
-            <input id="messageInput" class="messageInput" type="text" placeholder="Type a message">
-            <button id="messageButton" class="messageButton" type="submit">Send</button>
+          <input
+            id="messageInput"
+            class="messageInput"
+            type="text"
+            placeholder="Type a message"
+          />
+          <button id="messageButton" class="messageButton" type="submit">
+            Send
+          </button>
         </form>
-    </section>
-
+      </section>
     </main>
-      <div id="nameModal" class="modal">
-    <form id="nameForm" class="nameForm">
-      <label for="nameInput">Choose a name to enter the chat:</label>
-      <input id="nameInput" class="nameInput" type="text" placeholder="Your name" maxlength="12" />
-      <button type="submit" class="formButton messageButton">Enter Chat</button>
-    </form>
-  </div>
-  
-   <script type="module" src="script.js"></script>
+    <div id="nameModal" class="modal">
+      <form id="nameForm" class="nameForm">
+        <label for="nameInput">Choose a name to enter the chat:</label>
+        <input
+          id="nameInput"
+          class="nameInput"
+          type="text"
+          placeholder="Your name"
+          maxlength="12"
+        />
+        <button type="submit" class="formButton messageButton">
+          Enter Chat
+        </button>
+      </form>
+    </div>
 
-</body>
+    <script type="module" src="script.js"></script>
+  </body>
 </html>

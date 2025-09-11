@@ -10,7 +10,12 @@ const nameForm = document.getElementById("nameForm");
 const inputNameForm = document.getElementById("nameInput");
 const usernameLabel = document.getElementById("username");
 const activeUsersList= document.getElementById('activeUsersList')
+const chatTitle=document.getElementById('chatTitle');
 let username;
+
+let baseChat = 'general'; 
+let privateChats = {};
+ let generalChat = []; 
 
 //manage the msgs into the chatspace
 function addMessage(username, text, fromMe = false) {
@@ -36,13 +41,33 @@ function addMessage(username, text, fromMe = false) {
   messagesSpace.appendChild(li);
   messagesSpace.scrollTop = messagesSpace.scrollHeight;
 }
-
-//send a new msg
+//Send a new msg
 messageForm.addEventListener("submit", (e) => {
   e.preventDefault();
   const text = messageInput.value.trim();
+
   if (text !== "" && username) {
-    socket.emit("chat message", { text, username });
+    //if is the general chat
+    if (baseChat === 'general') {
+      socket.emit("chat message", { text, username });
+    } else {
+      // if is a private chat use the ids 
+      // baseChat = `${socket.id}-${receptorId}`
+      const [id1, id2] = baseChat.split("-");
+      const receptor = id1 === socket.id ? id2 : id1;
+
+      socket.emit("private message", {
+        receptor,
+        message: text
+      });
+
+      //save history of private chats
+      const chatHistory = privateChats[baseChat] || [];
+      chatHistory.push({ from: socket.id, sender: username, message: text });
+      //update
+      privateChats[baseChat] = chatHistory;
+      addMessage(username, text, true); // show msg
+    }
     messageInput.value = "";
   }
 });
@@ -50,8 +75,17 @@ messageForm.addEventListener("submit", (e) => {
 //when is a new msg validates if is mine or another user
 socket.on("chat message", (info) => {
   const fromMe = info.username === username;
+
+  // save the general chat history
+  generalChat.push({
+    from: info.username,
+    message: info.text,
+    fromMe
+  });
+
   addMessage(info.username, info.text, fromMe);
 });
+
 
 //save the username
 nameForm.onsubmit = (e) => {
@@ -75,11 +109,11 @@ nameForm.onsubmit = (e) => {
     if (response.ok) {
       //save the name
       username = inputName;
+      socket.username = username; //save socket username
       modalName.classList.add("hiddenModal");
       inputNameForm.value = "";
       usernameLabel.textContent = username;
     } else {
-      //ask for another name
       showNotification(
         "Username is already in use. Please enter a different name.",
         4000
@@ -88,15 +122,55 @@ nameForm.onsubmit = (e) => {
   });
 };
 
-//handle connections
+//manage a user connected
 socket.on("connected", (data) => {
   showNotification(`${data.username} connected!`, 2000);
-  updateUsers(data.activeUsers); 
+
+  // validation
+  socket.username = socket.username || data.username;
+
+  // update list with all the active user but no the logged user
+  const filteredUsers = {};
+  for (const [id, name] of Object.entries(data.users)) {
+    if (name !== socket.username) {
+      filteredUsers[id] = name;
+    }
+  }
+  updateUsers(filteredUsers);
 });
+//manage disconections
+socket.on("disconnected", (data) => {
+  if (data && data.username) {
+    showNotification(`${data.username} disconnected!`, 2000);
+//update list
+    const filteredUsers = {};
+    for (const [id, name] of Object.entries(data.users)) {
+      if (name !== socket.username) {
+        filteredUsers[id] = name;
+      }
+    }
 
+    updateUsers(filteredUsers);
+  } else {
+    showNotification("A user disconnected!", 2000);
+  }
+});
+//manage a private message
+socket.on("private message", ({ from, message, sender }) => {
+  // create a chat id to the chat
+  const chatId = [socket.id, from].sort().join("-");
 
-socket.on("disconnected", () => {
-  showNotification("A user disconnected!", 2000);
+  // save the history
+  if (!privateChats[chatId]) privateChats[chatId] = [];
+  privateChats[chatId].push({ from, sender, message });
+
+  // uodate msgs
+  if (baseChat === chatId) {
+    const fromMe = from === socket.id ? true : false;
+    addMessage(sender, message, fromMe);
+  } else {
+    showNotification(`New message from ${sender}`, 3000);
+  }
 });
 
 //notifications
@@ -118,37 +192,96 @@ function showNotification(message, duration) {
     notif.addEventListener("transitionend", () => notif.remove());
   }, duration);
 }
-
-function updateUsers(listUsers){
+function updateUsers(usersObj) {
   activeUsersList.innerHTML = ''; 
-  listUsers.forEach(user => {
+
+  // element for general chat
+  const generalChat = document.createElement('li');
+  generalChat.classList.add('liNewUser');
+  generalChat.id = 'general';  
+  const svgNS = "http://www.w3.org/2000/svg";
+  const iconUser = document.createElementNS(svgNS, "svg");
+  iconUser.setAttribute("viewBox", "0 0 24 24");
+  iconUser.setAttribute("width", "20");
+  iconUser.setAttribute("height", "20");
+  iconUser.classList.add("userIcon");
+
+  const path = document.createElementNS(svgNS, "path");
+  path.setAttribute("d", "M12 2C6.579 2 2 6.579 2 12s4.579 10 10 10 10-4.579 10-10S17.421 2 12 2zm0 5c1.727 0 3 1.272 3 3s-1.273 3-3 3c-1.726 0-3-1.272-3-3s1.274-3 3-3zm-5.106 9.772c.897-1.32 2.393-2.2 4.106-2.2h2c1.714 0 3.209.88 4.106 2.2C15.828 18.14 14.015 19 12 19s-3.828-.86-5.106-2.228z");
+
+  iconUser.appendChild(path);
+
+  const userName = document.createElement('span');
+  userName.textContent = 'General Chat';
+
+  generalChat.appendChild(iconUser);
+  generalChat.appendChild(userName);
+
+  activeUsersList.appendChild(generalChat);
+
+ //activate the general chat
+  generalChat.onclick = () => {
+    startChat('general', 'General Chat');
+  };
+
+  // active users
+  Object.entries(usersObj).forEach(([socketId, username]) => {
     const newUser = document.createElement('li');
     newUser.classList.add('liNewUser');
 
-    
-    const svgNS = "http://www.w3.org/2000/svg";
-    const iconUser = document.createElementNS(svgNS, "svg");
-    iconUser.setAttribute("viewBox", "0 0 24 24");
-    iconUser.setAttribute("width", "20");
-    iconUser.setAttribute("height", "20");
-    iconUser.classList.add("userIcon");
+    newUser.id = `user-${socketId}`;
+    newUser.dataset.socketid = socketId;
 
-    const path = document.createElementNS(svgNS, "path");
-    path.setAttribute("d", "M12 2C6.579 2 2 6.579 2 12s4.579 10 10 10 10-4.579 10-10S17.421 2 12 2zm0 5c1.727 0 3 1.272 3 3s-1.273 3-3 3c-1.726 0-3-1.272-3-3s1.274-3 3-3zm-5.106 9.772c.897-1.32 2.393-2.2 4.106-2.2h2c1.714 0 3.209.88 4.106 2.2C15.828 18.14 14.015 19 12 19s-3.828-.86-5.106-2.228z");
+    const iconUserClone = iconUser.cloneNode(true);
 
-    iconUser.appendChild(path);
+    const userNameSpan = document.createElement('span');
+    userNameSpan.textContent = username;
 
-
-    const userName = document.createElement('span');
-    userName.textContent = user;
-
-
-    newUser.appendChild(iconUser);
-    newUser.appendChild(userName);
+    newUser.appendChild(iconUserClone);
+    newUser.appendChild(userNameSpan);
 
     activeUsersList.appendChild(newUser);
+
+    newUser.onclick = () => {
+      startChat(socketId, username);
+    };
   });
 }
+
+
+function startChat(personSocketId, personUserName) {
+  // if is the general chat
+  if (personSocketId === 'general') {
+    baseChat = 'general';
+    chatTitle.textContent = "General Chat";
+
+    //clear space
+    messagesSpace.innerHTML = "";
+
+    //load the history
+    generalChat.forEach(({ from, message, fromMe }) => {
+      addMessage(from, message, fromMe);
+    });
+
+    return;
+  }
+
+  // if is a private chat
+  const chatId = [socket.id, personSocketId].sort().join("-");
+  baseChat = chatId;
+  chatTitle.textContent = "Chat with " + personUserName;
+
+  // clear space
+  messagesSpace.innerHTML = "";
+
+  //load history
+  const history = privateChats[chatId] || [];
+  history.forEach(({ from, sender, message }) => {
+    const fromMe = from === socket.id;
+    addMessage(sender, message, fromMe);
+  });
+}
+
 
 
 //<img src="/user.svg">
