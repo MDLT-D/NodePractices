@@ -41,6 +41,7 @@ io.on("connection", (socket) => {
       delete activeUsers[socket.id];
 
       io.emit("disconnected", {
+        socketId: socket.id,
         username: disconnectedUser,
         users: activeUsers,
       });
@@ -54,35 +55,26 @@ io.on("connection", (socket) => {
   socket.on("chat message", (messageInfo) => {
     io.emit("chat message", messageInfo);
   });
-//manage a private message
+  //manage a private message
+
   socket.on("private message", ({ receptor, message }) => {
     const from = socket.id;
     const sender = socket.username;
 
     if (!activeUsers[receptor]) return;
 
-    // id for chat sender-receptor
     const chatId = [from, receptor].sort().join("-");
 
-    // History of chat for a new chat if not exists
     if (!privateChats[chatId]) privateChats[chatId] = [];
 
-    // Save msg in the history
-    privateChats[chatId].push({
-      from,
-      sender,
-      message,
-      timestamp: Date.now(),
-    });
+    privateChats[chatId].push({ from, sender, message, timestamp: Date.now() });
 
-    // send message only to receptor(id)
     io.to(receptor).emit("private message", {
       from,
       sender,
       message,
     });
 
-    //save to the sender to keep history
     socket.emit("private sent", {
       to: receptor,
       sender,

@@ -1,6 +1,5 @@
 import { io } from "https://cdn.socket.io/4.8.1/socket.io.esm.min.js";
 
-
 const socket = io();
 const modalName = document.getElementById("nameModal");
 const messageForm = document.getElementById("formChat");
@@ -9,13 +8,13 @@ const messagesSpace = document.getElementById("messagesSpace");
 const nameForm = document.getElementById("nameForm");
 const inputNameForm = document.getElementById("nameInput");
 const usernameLabel = document.getElementById("username");
-const activeUsersList= document.getElementById('activeUsersList')
-const chatTitle=document.getElementById('chatTitle');
+const activeUsersList = document.getElementById("activeUsersList");
+const chatTitle = document.getElementById("chatTitle");
 let username;
 
-let baseChat = 'general'; 
+let baseChat = "general";
 let privateChats = {};
- let generalChat = []; 
+let generalChat = [];
 
 //manage the msgs into the chatspace
 function addMessage(username, text, fromMe = false) {
@@ -48,17 +47,17 @@ messageForm.addEventListener("submit", (e) => {
 
   if (text !== "" && username) {
     //if is the general chat
-    if (baseChat === 'general') {
+    if (baseChat === "general") {
       socket.emit("chat message", { text, username });
     } else {
-      // if is a private chat use the ids 
+      // if is a private chat use the ids
       // baseChat = `${socket.id}-${receptorId}`
       const [id1, id2] = baseChat.split("-");
       const receptor = id1 === socket.id ? id2 : id1;
 
       socket.emit("private message", {
         receptor,
-        message: text
+        message: text,
       });
 
       //save history of private chats
@@ -80,12 +79,19 @@ socket.on("chat message", (info) => {
   generalChat.push({
     from: info.username,
     message: info.text,
-    fromMe
+    fromMe,
   });
 
-  addMessage(info.username, info.text, fromMe);
+  // only show messages if the general chat is active
+  if (baseChat === "general") {
+    addMessage(info.username, info.text, fromMe);
+  } else {
+    // show a notification if you're in a private chat
+    showNotification(`New general message from ${info.username}`, 3000);
+    const chatLi = document.getElementById("general");
+    chatLi.classList.add("liMsg");
+  }
 });
-
 
 //save the username
 nameForm.onsubmit = (e) => {
@@ -142,7 +148,7 @@ socket.on("connected", (data) => {
 socket.on("disconnected", (data) => {
   if (data && data.username) {
     showNotification(`${data.username} disconnected!`, 2000);
-//update list
+    //update list
     const filteredUsers = {};
     for (const [id, name] of Object.entries(data.users)) {
       if (name !== socket.username) {
@@ -151,6 +157,12 @@ socket.on("disconnected", (data) => {
     }
 
     updateUsers(filteredUsers);
+
+    if (baseChat !== "general" && baseChat.includes(data.socketId)) {
+      console.log("tiene que volver al genral");
+      baseChat = "general";
+      startChat("general", "General Chat");
+    }
   } else {
     showNotification("A user disconnected!", 2000);
   }
@@ -164,12 +176,17 @@ socket.on("private message", ({ from, message, sender }) => {
   if (!privateChats[chatId]) privateChats[chatId] = [];
   privateChats[chatId].push({ from, sender, message });
 
-  // uodate msgs
+  // update msgs
   if (baseChat === chatId) {
-    const fromMe = from === socket.id ? true : false;
+    const fromMe = from === socket.id;
     addMessage(sender, message, fromMe);
   } else {
+    // show a notification if you're not in this private chat
     showNotification(`New message from ${sender}`, 3000);
+
+    // apply class to the li of that user
+    const chatLi = document.getElementById(`user-${from}`);
+    if (chatLi) chatLi.classList.add("liMsg");
   }
 });
 
@@ -193,12 +210,12 @@ function showNotification(message, duration) {
   }, duration);
 }
 function updateUsers(usersObj) {
-  activeUsersList.innerHTML = ''; 
+  activeUsersList.innerHTML = "";
 
   // element for general chat
-  const generalChat = document.createElement('li');
-  generalChat.classList.add('liNewUser');
-  generalChat.id = 'general';  
+  const generalChat = document.createElement("li");
+  generalChat.classList.add("liNewUser");
+  generalChat.id = "general";
   const svgNS = "http://www.w3.org/2000/svg";
   const iconUser = document.createElementNS(svgNS, "svg");
   iconUser.setAttribute("viewBox", "0 0 24 24");
@@ -207,34 +224,40 @@ function updateUsers(usersObj) {
   iconUser.classList.add("userIcon");
 
   const path = document.createElementNS(svgNS, "path");
-  path.setAttribute("d", "M12 2C6.579 2 2 6.579 2 12s4.579 10 10 10 10-4.579 10-10S17.421 2 12 2zm0 5c1.727 0 3 1.272 3 3s-1.273 3-3 3c-1.726 0-3-1.272-3-3s1.274-3 3-3zm-5.106 9.772c.897-1.32 2.393-2.2 4.106-2.2h2c1.714 0 3.209.88 4.106 2.2C15.828 18.14 14.015 19 12 19s-3.828-.86-5.106-2.228z");
+  path.setAttribute(
+    "d",
+    "M12 2C6.579 2 2 6.579 2 12s4.579 10 10 10 10-4.579 10-10S17.421 2 12 2zm0 5c1.727 0 3 1.272 3 3s-1.273 3-3 3c-1.726 0-3-1.272-3-3s1.274-3 3-3zm-5.106 9.772c.897-1.32 2.393-2.2 4.106-2.2h2c1.714 0 3.209.88 4.106 2.2C15.828 18.14 14.015 19 12 19s-3.828-.86-5.106-2.228z"
+  );
 
   iconUser.appendChild(path);
 
-  const userName = document.createElement('span');
-  userName.textContent = 'General Chat';
+  const userName = document.createElement("span");
+  userName.textContent = "General Chat";
 
   generalChat.appendChild(iconUser);
   generalChat.appendChild(userName);
 
   activeUsersList.appendChild(generalChat);
 
- //activate the general chat
+  //activate the general chat
   generalChat.onclick = () => {
-    startChat('general', 'General Chat');
+    if (generalChat.classList.contains("liMsg")) {
+      generalChat.classList.remove("liMsg");
+    }
+    startChat("general", "General Chat");
   };
 
   // active users
   Object.entries(usersObj).forEach(([socketId, username]) => {
-    const newUser = document.createElement('li');
-    newUser.classList.add('liNewUser');
+    const newUser = document.createElement("li");
+    newUser.classList.add("liNewUser");
 
     newUser.id = `user-${socketId}`;
     newUser.dataset.socketid = socketId;
 
     const iconUserClone = iconUser.cloneNode(true);
 
-    const userNameSpan = document.createElement('span');
+    const userNameSpan = document.createElement("span");
     userNameSpan.textContent = username;
 
     newUser.appendChild(iconUserClone);
@@ -243,16 +266,18 @@ function updateUsers(usersObj) {
     activeUsersList.appendChild(newUser);
 
     newUser.onclick = () => {
+      if (newUser.classList.contains("liMsg")) {
+        newUser.classList.remove("liMsg");
+      }
       startChat(socketId, username);
     };
   });
 }
 
-
 function startChat(personSocketId, personUserName) {
   // if is the general chat
-  if (personSocketId === 'general') {
-    baseChat = 'general';
+  if (personSocketId === "general") {
+    baseChat = "general";
     chatTitle.textContent = "General Chat";
 
     //clear space
@@ -281,7 +306,3 @@ function startChat(personSocketId, personUserName) {
     addMessage(sender, message, fromMe);
   });
 }
-
-
-
-//<img src="/user.svg">
